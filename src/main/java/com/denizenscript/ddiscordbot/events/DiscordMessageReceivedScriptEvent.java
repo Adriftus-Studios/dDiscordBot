@@ -1,7 +1,9 @@
 package com.denizenscript.ddiscordbot.events;
 
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
-import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
 import com.denizenscript.ddiscordbot.objects.DiscordChannelTag;
 import com.denizenscript.ddiscordbot.objects.DiscordGroupTag;
@@ -9,6 +11,8 @@ import com.denizenscript.ddiscordbot.objects.DiscordUserTag;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.channel.Channel;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.core.ListTag;
 import com.denizenscript.denizencore.objects.ObjectTag;
@@ -91,22 +95,24 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
                     getEvent().getMessage().getUserMentions()));
         }
         else if (name.equals("formatted_message")) {
-            // NEW
             String m = getEvent().getMessage().getContent();
-            Iterator<User> it = getEvent().getMessage().getUserMentions().toIterable().iterator();
-            while (it.hasNext()) {
-                User u = it.next();
-                m = m.replaceAll("(<[^<>$]!?" + u.getId().asString() + ">)", "@" + u.getUsername());
+            List<User> users = getEvent().getMessage().getUserMentions().collectList().block();
+            for (User user : users) {
+                m = m.replace(user.getMention(), "@" + user.getUsername() + "#" + user.getDiscriminator());
+                // Discord is stupid, and adds a "!" for Nitro descriminators, and also has different output for the getUsername method.
+                m = m.replace(user.getMention().substring(0,2) + "!" + user.getMention().substring(2), "@" + user.getUsername());
             }
-            for (String s : m.split("\\s+")) {
-                if (s.matches("(^<#[0-9]{18}>$)")) {
-                    String str = s.replace("<#", "").replace(">", "");
-                    m = m.replaceAll("(<[^<>$]" + str + ">)", "#" + ((GuildChannel) DenizenDiscordBot.instance.connections.get(botID).client.getChannelById(Snowflake.of(str)).block()).getName().replaceAll("[^a-zA-Z-]", ""));
-                }
-                if (s.matches("(^<@&[0-9]{18}>$)")) {
-                    String str = s.replace("<@&", "").replace(">", "");
-                    m = m.replaceAll("(<@[^<>$]" + str + ">)", "@" + (DenizenDiscordBot.instance.connections.get(botID).client.getRoleById(getEvent().getGuildId().get(), Snowflake.of(str)).block()).getName().replaceAll("[^\\Wa-zA-Z-]", ""));
-                }
+            List<Role> roles = getEvent().getMessage().getRoleMentions().collectList().block();
+            for (Role role : roles) {
+                m = m.replace(role.getMention(), "@" + role.getName());
+            }
+            // Discord API does not reliably offer a better method for this.
+            final Pattern CHANNEL_PATTERN = Pattern.compile("<#([0-9]+)>");
+            Matcher matcher = CHANNEL_PATTERN.matcher(m);
+            while (matcher.find()) {
+                String channelID = matcher.group(1);
+                Channel channel = getEvent().getClient().getChannelById(Snowflake.of(channelID)).block();
+                m = m.replace(channel.getMention(), "#" + ((GuildChannel) channel).getName());
             }
             return new ElementTag(m);
         }
