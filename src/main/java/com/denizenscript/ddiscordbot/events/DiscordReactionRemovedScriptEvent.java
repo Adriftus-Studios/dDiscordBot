@@ -30,7 +30,7 @@ public class DiscordReactionRemovedScriptEvent  extends DiscordScriptEvent {
     // @Switch channel:<channel_id> to only process the event when it occurs in a specified Discord channel.
     // @Switch group:<group_id> to only process the event for a specified Discord group.
     //
-    // @Triggers when a Discord user add a reaction to a message.
+    // @Triggers when a Discord user removes a reaction from a message.
     //
     // @Plugin dDiscordBot
     //
