@@ -20,6 +20,33 @@ import java.util.Iterator;
 public class DiscordReactionRemovedScriptEvent  extends DiscordScriptEvent {
     public static DiscordReactionRemovedScriptEvent instance;
 
+    // <--[event]
+    // @Events
+    // discord reaction removed
+    //
+    // @Regex ^on discord reaction removed$
+    //
+    // @Switch for:<bot> to only process the event for a specified Discord bot.
+    // @Switch channel:<channel_id> to only process the event when it occurs in a specified Discord channel.
+    // @Switch group:<group_id> to only process the event for a specified Discord group.
+    //
+    // @Triggers when a Discord user add a reaction to a message.
+    //
+    // @Plugin dDiscordBot
+    //
+    // @Context
+    // <context.bot> returns the relevant Discord bot object.
+    // <context.channel> returns the channel.
+    // <context.group> returns the group.
+    // <context.message> returns the message (raw).
+    // <context.message_id> returns the message ID.
+    // <context.custom> returns true if the emoji is a custom emoji.
+    // <context.emoji_id> returns the ID of a custom emoji
+    // <context.emoji> returns the unicode emoji, or name of the custom emoji.
+    // <context.author> returns the user that added the reaction.
+    //
+    // -->
+
     public ReactionRemoveEvent getEvent() {
         return (ReactionRemoveEvent) event;
     }
@@ -53,56 +80,20 @@ public class DiscordReactionRemovedScriptEvent  extends DiscordScriptEvent {
         else if (name.equals("author")) {
             return new DiscordUserTag(botID, getEvent().getUser().block());
         }
+        else if (name.equals("custom")) {
+            return new ElementTag(getEvent().getEmoji().asCustomEmoji().isPresent());
+        }
         else if (name.equals("emoji_id")) {
             return new ElementTag(getEvent().getEmoji().asCustomEmoji().get().getId().asString());
         }
         else if (name.equals("emoji")) {
-            return new ElementTag(getEvent().getEmoji().asCustomEmoji().get().getName());
-        }
-        else if (name.equals("message")) {
-            return new ElementTag(getEvent().getMessage().block().getContent());
+            if (getEvent().getEmoji().asCustomEmoji().isPresent()) {
+                return new ElementTag(getEvent().getEmoji().asCustomEmoji().get().getName());
+            }
+            return new ElementTag(getEvent().getEmoji().asUnicodeEmoji().get().getRaw());
         }
         else if (name.equals("message_id")) {
             return new ElementTag(getEvent().getMessage().block().getId().asString());
-        }
-        else if (name.equals("formatted_message")) {
-            String m = getEvent().getMessage().block().getContent();
-            Iterator<User> it = getEvent().getMessage().block().getUserMentions().toIterable().iterator();
-            while (it.hasNext()) {
-                User u = it.next();
-                m = m.replaceAll("(<[^<>$]!?" + u.getId().asString() + ">)", "@" + u.getUsername());
-            }
-            for (String s : m.split("\\s+")) {
-                if (s.matches("(^<#[0-9]{18}>$)")) {
-                    String str = s.replace("<#", "").replace(">", "");
-                    m = m.replaceAll("(<[^<>$]" + str + ">)", "#" + ((GuildChannel) DenizenDiscordBot.instance.connections.get(botID).client.getChannelById(Snowflake.of(str)).block()).getName().replaceAll("[^a-zA-Z-]", ""));
-                }
-                if (s.matches("(^<@&[0-9]{18}>$)")) {
-                    String str = s.replace("<@&", "").replace(">", "");
-                    m = m.replaceAll("(<@[^<>$]" + str + ">)", "@" + (DenizenDiscordBot.instance.connections.get(botID).client.getRoleById(getEvent().getGuildId().get(), Snowflake.of(str)).block()).getName().replaceAll("[^\\Wa-zA-Z-]", ""));
-                }
-            }
-            return new ElementTag(m);
-        }
-        else if (name.equals("attachments")) {
-            if (getEvent().getMessage().block().getAttachments().size() != 0) {
-                ListTag list = new ListTag();
-                for (Attachment att : getEvent().getMessage().block().getAttachments()) {
-                    list.addObject(new ElementTag(att.getUrl()));
-                }
-                return list;
-            }
-        }
-        else if (name.equals("urls")) {
-            ListTag list = new ListTag();
-            for (String s : getEvent().getMessage().block().getContent().split("\\s+")) {
-                if (s.matches("(https?://)[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")) {
-                    list.addObject(new ElementTag(s));
-                }
-            }
-            if(list.size() != 0) {
-                return list;
-            }
         }
         else if (name.equals("channel_name")) {
             DenizenDiscordBot.userContextDeprecation.warn();
