@@ -37,6 +37,8 @@ public class DenizenDiscordBot extends JavaPlugin {
             ScriptEvent.registerScriptEvent(DiscordUserJoinsScriptEvent.instance = new DiscordUserJoinsScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordUserLeavesScriptEvent.instance = new DiscordUserLeavesScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordUserRoleChangeScriptEvent.instance = new DiscordUserRoleChangeScriptEvent());
+            ScriptEvent.registerScriptEvent(DiscordReactionAddedScriptEvent.instance = new DiscordReactionAddedScriptEvent());
+            ScriptEvent.registerScriptEvent(DiscordReactionRemovedScriptEvent.instance = new DiscordReactionRemovedScriptEvent());
             ObjectFetcher.registerWithObjectFetcher(DiscordChannelTag.class, DiscordChannelTag.tagProcessor);
             ObjectFetcher.registerWithObjectFetcher(DiscordBotTag.class, DiscordBotTag.tagProcessor);
             ObjectFetcher.registerWithObjectFetcher(DiscordGroupTag.class, DiscordGroupTag.tagProcessor);
