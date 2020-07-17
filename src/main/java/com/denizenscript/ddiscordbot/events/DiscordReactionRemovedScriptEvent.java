@@ -2,20 +2,12 @@ package com.denizenscript.ddiscordbot.events;
 
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
-import com.denizenscript.ddiscordbot.objects.DiscordChannelTag;
-import com.denizenscript.ddiscordbot.objects.DiscordGroupTag;
-import com.denizenscript.ddiscordbot.objects.DiscordUserTag;
+import com.denizenscript.ddiscordbot.objects.*;
 import com.denizenscript.denizencore.objects.ObjectTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
-import com.denizenscript.denizencore.objects.core.ListTag;
-import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.ReactionRemoveEvent;
-import discord4j.core.object.entity.Attachment;
-import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
-
-import java.util.Iterator;
 
 public class DiscordReactionRemovedScriptEvent  extends DiscordScriptEvent {
     public static DiscordReactionRemovedScriptEvent instance;
@@ -42,7 +34,7 @@ public class DiscordReactionRemovedScriptEvent  extends DiscordScriptEvent {
     // <context.message_id> returns the message ID.
     // <context.custom> returns true if the emoji is a custom emoji.
     // <context.emoji_id> returns the ID of a custom emoji
-    // <context.emoji> returns the unicode emoji, or name of the custom emoji.
+    // <context.emoji> returns the DiscordEmojiTag for the emoji.
     // <context.author> returns the user that added the reaction.
     //
     // -->
@@ -87,13 +79,13 @@ public class DiscordReactionRemovedScriptEvent  extends DiscordScriptEvent {
             return new ElementTag(getEvent().getEmoji().asCustomEmoji().get().getId().asString());
         }
         else if (name.equals("emoji")) {
-            if (getEvent().getEmoji().asCustomEmoji().isPresent()) {
-                return new ElementTag(getEvent().getEmoji().asCustomEmoji().get().getName());
-            }
-            return new ElementTag(getEvent().getEmoji().asUnicodeEmoji().get().getRaw());
+            return new DiscordEmojiTag(botID, getEvent().getEmoji());
         }
         else if (name.equals("message_id")) {
             return new ElementTag(getEvent().getMessage().block().getId().asString());
+        }
+        else if (name.equals("message")) {
+            return new DiscordMessageTag(botID, getEvent().getMessage().block());
         }
         else if (name.equals("channel_name")) {
             DenizenDiscordBot.userContextDeprecation.warn();
