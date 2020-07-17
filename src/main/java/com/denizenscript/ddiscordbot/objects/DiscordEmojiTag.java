@@ -23,10 +23,11 @@ public class DiscordEmojiTag implements ObjectTag {
             return null;
         }
         String bot = string.split(",")[0];
-        long chanID = Long.parseLong(string.split(",")[1]);
-        long msgID = Long.parseLong(string.split(",")[2]);
-//        return new DiscordEmojiTag(bot, chanID, msgID);
-        //TODO
+        String type = string.split(",")[1];
+        if (type.equalsIgnoreCase("unicode")) {
+            String id = string.split(",")[2];
+            return new DiscordEmojiTag(bot, ReactionEmoji.unicode(id));
+        }
         return null;
     }
 

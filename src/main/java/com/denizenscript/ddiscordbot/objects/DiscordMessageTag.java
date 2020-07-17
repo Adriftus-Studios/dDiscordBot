@@ -57,6 +57,8 @@ public class DiscordMessageTag implements ObjectTag {
 
     public DiscordMessageTag(String bot, long channelId, long messageId) {
         this.bot = bot;
+        this.channel = getBot().client.getChannelById(Snowflake.of(channelId)).block();
+        this.message = getBot().client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block();
         this.channel_id = channelId;
         this.message_id = messageId;
     }
@@ -65,8 +67,8 @@ public class DiscordMessageTag implements ObjectTag {
         this.bot = bot;
         this.channel = message.getChannel().block();
         this.message = message;
-        channel_id = channel.getId().asLong();
-        message_id = message.getId().asLong();
+        this.channel_id = channel.getId().asLong();
+        this.message_id = message.getId().asLong();
     }
 
     public DiscordConnection getBot() {
