@@ -7,6 +7,7 @@ import com.denizenscript.denizencore.objects.Fetchable;
 import com.denizenscript.denizencore.objects.ObjectTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.core.ListTag;
+import com.denizenscript.denizencore.objects.core.MapTag;
 import com.denizenscript.denizencore.tags.Attribute;
 import com.denizenscript.denizencore.tags.ObjectTagProcessor;
 import com.denizenscript.denizencore.tags.TagContext;
@@ -17,7 +18,6 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
-
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -121,13 +121,13 @@ public class DiscordMessageTag implements ObjectTag {
         });
 
         // <--[tag]
-        // @attribute <DiscordMessageTag.contents>
+        // @attribute <DiscordMessageTag.message>
         // @returns ElementTag
         // @plugin dDiscordBot
         // @description
         // Returns the contents of the message.
         // -->
-        registerTag("contents", (attribute, object) -> {
+        registerTag("message", (attribute, object) -> {
             String contents;
             if (object.message != null) {
                 contents = object.message.getContent();
@@ -213,6 +213,21 @@ public class DiscordMessageTag implements ObjectTag {
                 list.addObject(new DiscordUserTag(object.bot, object.getBot().client.getUserById(u).block()));
             }
             return list;
+        });
+
+        // <--[tag]
+        // @attribute <DiscordMessageTag.reactions>
+        // @returns MapTag(DiscordEmojiTag,ElementTag)
+        // @plugin dDiscordBot
+        // @description
+        // Returns a map of DiscordEmojiTags with their counts.
+        // -->
+        registerTag("reactions", (attribute, object) -> {
+            MapTag map = new MapTag();
+            object.message.getReactions().stream().forEach((obj) -> {
+                map.putObject(new DiscordEmojiTag(object.bot, obj.getEmoji()).identify(), new ElementTag(obj.getCount()));
+            });
+            return map;
         });
     }
 

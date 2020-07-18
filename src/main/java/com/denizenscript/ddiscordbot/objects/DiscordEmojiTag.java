@@ -10,6 +10,7 @@ import com.denizenscript.denizencore.tags.Attribute;
 import com.denizenscript.denizencore.tags.ObjectTagProcessor;
 import com.denizenscript.denizencore.tags.TagContext;
 import com.denizenscript.denizencore.tags.TagRunnable;
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.reaction.ReactionEmoji;
 
 public class DiscordEmojiTag implements ObjectTag {
@@ -22,11 +23,21 @@ public class DiscordEmojiTag implements ObjectTag {
         if (string.contains("@")) {
             return null;
         }
-        String bot = string.split(",")[0];
-        String type = string.split(",")[1];
-        if (type.equalsIgnoreCase("unicode")) {
-            String id = string.split(",")[2];
-            return new DiscordEmojiTag(bot, ReactionEmoji.unicode(id));
+        try {
+            String bot = string.split(",")[0];
+            String type = string.split(",")[1];
+            if (type.equalsIgnoreCase("unicode")) {
+                String id = string.split(",")[2];
+                return new DiscordEmojiTag(bot, ReactionEmoji.unicode(id));
+            } else if (type.equalsIgnoreCase("custom")) {
+                String id = string.split(",")[2];
+                String name = string.split(",")[3];
+                String animated = string.split(",")[4];
+
+                return new DiscordEmojiTag(bot, ReactionEmoji.custom(Snowflake.of(Long.parseLong(id)), name, Boolean.valueOf(animated)));
+            }
+        } catch (IndexOutOfBoundsException e) {
+            return null;
         }
         return null;
     }
@@ -53,6 +64,17 @@ public class DiscordEmojiTag implements ObjectTag {
         this.emoji = emoji;
     }
 
+    public String getId() {
+        if (emoji.asCustomEmoji().isPresent()) {
+            emoji_id = emoji.asCustomEmoji().get().getId().asString();
+        } else if (emoji.asUnicodeEmoji().isPresent()){
+            emoji_id = emoji.asUnicodeEmoji().get().getRaw();
+        } else {
+            emoji_id = "INVALID";
+        }
+        return emoji_id;
+    }
+
     public DiscordConnection getBot() {
         return DenizenDiscordBot.instance.connections.get(bot);
     }
@@ -73,22 +95,15 @@ public class DiscordEmojiTag implements ObjectTag {
         // Returns the ID of the emoji.
         // -->
         registerTag("id", (attribute, object) -> {
-            String emoji_id;
-            if (object.emoji.asCustomEmoji().isPresent()) {
-                emoji_id = object.emoji.asCustomEmoji().get().getId().asString();
-            } else if (object.emoji.asUnicodeEmoji().isPresent()){
-                emoji_id = object.emoji.asUnicodeEmoji().get().getRaw();
-            } else {
-                emoji_id = "INVALID";
-            }
-            return new ElementTag(emoji_id);
+            return new ElementTag(object.getId());
         });
+
         // <--[tag]
         // @attribute <DiscordEmojiTag.name>
         // @returns ElementTag
         // @plugin dDiscordBot
         // @description
-        // Returns the name of the emoji.
+        // Returns the name of the emoji. (Unicode Emojis do not have a name)
         // -->
         registerTag("name", (attribute, object) -> {
             String emoji_id;
@@ -101,6 +116,7 @@ public class DiscordEmojiTag implements ObjectTag {
             }
             return new ElementTag(emoji_id);
         });
+
         // <--[tag]
         // @attribute <DiscordEmojiTag.animated>
         // @returns ElementTag
@@ -155,7 +171,7 @@ public class DiscordEmojiTag implements ObjectTag {
     @Override
     public String identify() {
         if (emoji.asCustomEmoji().isPresent()) {
-            emoji_id = "custom," + emoji.asCustomEmoji().get().getId().asString();
+            emoji_id = "custom," + emoji.asCustomEmoji().get().getId().asString() + "," + emoji.asCustomEmoji().get().getName() + "," + emoji.asCustomEmoji().get().isAnimated();
         } else if (emoji.asUnicodeEmoji().isPresent()){
             emoji_id = "unicode," + emoji.asUnicodeEmoji().get().getRaw();
         } else {
