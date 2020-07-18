@@ -33,7 +33,6 @@ public class DiscordEmojiTag implements ObjectTag {
                 String id = string.split(",")[2];
                 String name = string.split(",")[3];
                 String animated = string.split(",")[4];
-
                 return new DiscordEmojiTag(bot, ReactionEmoji.custom(Snowflake.of(Long.parseLong(id)), name, Boolean.valueOf(animated)));
             }
         } catch (IndexOutOfBoundsException e) {

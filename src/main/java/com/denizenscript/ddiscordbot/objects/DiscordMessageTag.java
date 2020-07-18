@@ -32,10 +32,14 @@ public class DiscordMessageTag implements ObjectTag {
         if (string.contains("@")) {
             return null;
         }
-        String bot = string.split(",")[0];
-        long chanID = Long.parseLong(string.split(",")[1]);
-        long msgID = Long.parseLong(string.split(",")[2]);
-        return new DiscordMessageTag(bot, chanID, msgID);
+        try {
+            String bot = string.split(",")[0];
+            long chanID = Long.parseLong(string.split(",")[1]);
+            long msgID = Long.parseLong(string.split(",")[2]);
+            return new DiscordMessageTag(bot, chanID, msgID);
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
     }
 
     public static boolean matches(String arg) {
@@ -65,10 +69,10 @@ public class DiscordMessageTag implements ObjectTag {
 
     public DiscordMessageTag(String bot, Message message) {
         this.bot = bot;
-        this.channel = message.getChannel().block();
         this.message = message;
-        this.channel_id = channel.getId().asLong();
+        this.channel = message.getChannel().block();
         this.message_id = message.getId().asLong();
+        this.channel_id = channel.getId().asLong();
     }
 
     public DiscordConnection getBot() {
@@ -217,17 +221,17 @@ public class DiscordMessageTag implements ObjectTag {
 
         // <--[tag]
         // @attribute <DiscordMessageTag.reactions>
-        // @returns MapTag(DiscordEmojiTag,ElementTag)
+        // @returns ListTag(DiscordEmojiTag)
         // @plugin dDiscordBot
         // @description
         // Returns a map of DiscordEmojiTags with their counts.
         // -->
         registerTag("reactions", (attribute, object) -> {
-            MapTag map = new MapTag();
+            ListTag list = new ListTag();
             object.message.getReactions().stream().forEach((obj) -> {
-                map.putObject(new DiscordEmojiTag(object.bot, obj.getEmoji()).identify(), new ElementTag(obj.getCount()));
+                list.addObject(new DiscordEmojiTag(object.bot, obj.getEmoji()));
             });
-            return map;
+            return list;
         });
     }
 
