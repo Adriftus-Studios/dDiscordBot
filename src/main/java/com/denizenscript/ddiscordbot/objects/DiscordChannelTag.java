@@ -354,7 +354,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         }
         // <--[mechanism]
         // @object DiscordChannelTag
-        // @name name
+        // @name position
         // @input ElementTag(Number)
         // @description
         // Sets the position of the discord channel
