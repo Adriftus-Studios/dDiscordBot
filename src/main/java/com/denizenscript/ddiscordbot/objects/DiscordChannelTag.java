@@ -124,6 +124,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // @attribute <DiscordChannelTag.name>
         // @returns ElementTag
         // @plugin dDiscordBot
+        // @mechanism DiscordChannelTag.name
         // @description
         // Returns the name of the channel.
         // -->
@@ -173,7 +174,6 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // -->
         registerTag("id", (attribute, object) -> {
             return new ElementTag(object.channel_id);
-
         });
 
         // <--[tag]
@@ -215,6 +215,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // @attribute <DiscordChannelTag.position>
         // @returns ElementTag(Number)
         // @plugin dDiscordBot
+        // @mechanism DiscordChannelTag.position
         // @description
         // Returns the position of the channel.
         // -->
@@ -226,6 +227,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // @attribute <DiscordChannelTag.topic>
         // @returns ElementTag
         // @plugin dDiscordBot
+        // @mechanism DiscordChannelTag.topic
         // @description
         // Returns the topic of the channel.
         // -->
@@ -237,6 +239,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // @attribute <DiscordChannelTag.nsfw>
         // @returns ElementTag(Boolean)
         // @plugin dDiscordBot
+        // @mechanism DiscordChannelTag.nsfw
         // @description
         // Returns whether or not the channel is marked NSFW.
         // -->
@@ -248,6 +251,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // @attribute <DiscordChannelTag.rate_limit_per_user>
         // @returns ElementTag(Number)
         // @plugin dDiscordBot
+        // @mechanism DiscordChannelTag.rate_limit_per_user
         // @description
         // Returns the channels rate limit per user.
         // -->
@@ -259,6 +263,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // @attribute <DiscordChannelTag.bitrate>
         // @returns ElementTag(Number)
         // @plugin dDiscordBot
+        // @mechanism DiscordChannelTag.bitrate
         // @description
         // Returns the channels bitrate.
         // -->
@@ -270,6 +275,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // @attribute <DiscordChannelTag.user_limit>
         // @returns ElementTag(Number)
         // @plugin dDiscordBot
+        // @mechanism DiscordChannelTag.user_limit
         // @description
         // Returns the channels user limit.
         // -->
@@ -343,7 +349,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // <--[mechanism]
         // @object DiscordChannelTag
         // @name name
-        // @input ElementTag(String)
+        // @input ElementTag
         // @description
         // Sets the name of the discord channel
         // @tags
@@ -359,7 +365,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // @description
         // Sets the position of the discord channel
         // @tags
-        // <DiscordChannelTag.name>
+        // <DiscordChannelTag.position>
         // -->
         if (mechanism.matches("position") && mechanism.requireInteger()) {
             getChannel().getRestChannel().modify(ChannelModifyRequest.builder().position(mechanism.getValue().asInt()).build(), null).block().position();
@@ -367,7 +373,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // <--[mechanism]
         // @object DiscordChannelTag
         // @name topic
-        // @input ElementTag(String)
+        // @input ElementTag
         // @description
         // Sets the topic of the discord channel
         // @tags
