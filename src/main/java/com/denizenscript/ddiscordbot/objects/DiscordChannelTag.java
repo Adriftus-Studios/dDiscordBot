@@ -15,8 +15,9 @@ import com.denizenscript.denizencore.utilities.CoreUtilities;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.discordjson.json.ChannelModifyRequest;
 
-public class DiscordChannelTag implements ObjectTag {
+public class DiscordChannelTag implements ObjectTag, Adjustable {
 
     // <--[language]
     // @name DiscordChannelTag Objects
@@ -210,6 +211,72 @@ public class DiscordChannelTag implements ObjectTag {
             return new DiscordGroupTag(object.bot, guild);
 
         });
+        // <--[tag]
+        // @attribute <DiscordChannelTag.position>
+        // @returns ElementTag(Number)
+        // @plugin dDiscordBot
+        // @description
+        // Returns the position of the channel.
+        // -->
+        registerTag("position", (attribute, object) -> {
+            return new ElementTag(object.getChannel().getRestChannel().getData().block().position().get());
+        });
+
+        // <--[tag]
+        // @attribute <DiscordChannelTag.topic>
+        // @returns ElementTag
+        // @plugin dDiscordBot
+        // @description
+        // Returns the topic of the channel.
+        // -->
+        registerTag("topic", (attribute, object) -> {
+            return new ElementTag(object.getChannel().getRestChannel().getData().block().topic().get().get());
+        });
+
+        // <--[tag]
+        // @attribute <DiscordChannelTag.nsfw>
+        // @returns ElementTag(Boolean)
+        // @plugin dDiscordBot
+        // @description
+        // Returns whether or not the channel is marked NSFW.
+        // -->
+        registerTag("nsfw", (attribute, object) -> {
+            return new ElementTag(object.getChannel().getRestChannel().getData().block().nsfw().get());
+        });
+
+        // <--[tag]
+        // @attribute <DiscordChannelTag.rate_limit_per_user>
+        // @returns ElementTag(Number)
+        // @plugin dDiscordBot
+        // @description
+        // Returns the channels rate limit per user.
+        // -->
+        registerTag("rate_limit_per_user", (attribute, object) -> {
+            return new ElementTag(object.getChannel().getRestChannel().getData().block().rateLimitPerUser().get());
+        });
+
+        // <--[tag]
+        // @attribute <DiscordChannelTag.bitrate>
+        // @returns ElementTag(Number)
+        // @plugin dDiscordBot
+        // @description
+        // Returns the channels bitrate.
+        // -->
+        registerTag("bitrate", (attribute, object) -> {
+            return new ElementTag(object.getChannel().getRestChannel().getData().block().bitrate().get());
+        });
+
+        // <--[tag]
+        // @attribute <DiscordChannelTag.user_limit>
+        // @returns ElementTag(Number)
+        // @plugin dDiscordBot
+        // @description
+        // Returns the channels user limit.
+        // -->
+        registerTag("user_limit", (attribute, object) -> {
+            return new ElementTag(object.getChannel().getRestChannel().getData().block().userLimit().get());
+        });
+
     }
 
     public static ObjectTagProcessor<DiscordChannelTag> tagProcessor = new ObjectTagProcessor<>();
@@ -269,5 +336,98 @@ public class DiscordChannelTag implements ObjectTag {
             this.prefix = prefix;
         }
         return this;
+    }
+
+    @Override
+    public void adjust(Mechanism mechanism) {
+        // <--[mechanism]
+        // @object DiscordChannelTag
+        // @name name
+        // @input ElementTag(String)
+        // @description
+        // Sets the name of the discord channel
+        // @tags
+        // <DiscordChannelTag.name>
+        // -->
+        if (mechanism.matches("name")) {
+            getChannel().getRestChannel().modify(ChannelModifyRequest.builder().name(mechanism.getValue().asString()).build(), null).block().name();
+        }
+        // <--[mechanism]
+        // @object DiscordChannelTag
+        // @name name
+        // @input ElementTag(Number)
+        // @description
+        // Sets the position of the discord channel
+        // @tags
+        // <DiscordChannelTag.name>
+        // -->
+        if (mechanism.matches("position") && mechanism.requireInteger()) {
+            getChannel().getRestChannel().modify(ChannelModifyRequest.builder().position(mechanism.getValue().asInt()).build(), null).block().position();
+        }
+        // <--[mechanism]
+        // @object DiscordChannelTag
+        // @name topic
+        // @input ElementTag(String)
+        // @description
+        // Sets the topic of the discord channel
+        // @tags
+        // <DiscordChannelTag.topic>
+        // -->
+        if (mechanism.matches("topic")) {
+            getChannel().getRestChannel().modify(ChannelModifyRequest.builder().topic(mechanism.getValue().asString()).build(), null).block().topic();
+        }
+        // <--[mechanism]
+        // @object DiscordChannelTag
+        // @name nsfw
+        // @input ElementTag(Boolean)
+        // @description
+        // Set the channels NSFW status
+        // @tags
+        // <DiscordChannelTag.nsfw>
+        // -->
+        if (mechanism.matches("nsfw") && mechanism.requireBoolean()) {
+            getChannel().getRestChannel().modify(ChannelModifyRequest.builder().nsfw(mechanism.getValue().asBoolean()).build(), null).block().nsfw();
+        }
+        // <--[mechanism]
+        // @object DiscordChannelTag
+        // @name rate_limit_per_user
+        // @input ElementTag(Number)
+        // @description
+        // Set the channels rate limit per user
+        // @tags
+        // <DiscordChannelTag.rate_limit_per_user>
+        // -->
+        if (mechanism.matches("rate_limit_per_user") && mechanism.requireInteger()) {
+            getChannel().getRestChannel().modify(ChannelModifyRequest.builder().rateLimitPerUser(mechanism.getValue().asInt()).build(), null).block().rateLimitPerUser();
+        }
+        // <--[mechanism]
+        // @object DiscordChannelTag
+        // @name bitrate
+        // @input ElementTag(Number)
+        // @description
+        // Set the channels bitrate
+        // @tags
+        // <DiscordChannelTag.bitrate>
+        // -->
+        if (mechanism.matches("bitrate") && mechanism.requireInteger()) {
+            getChannel().getRestChannel().modify(ChannelModifyRequest.builder().bitrate(mechanism.getValue().asInt()).build(), null).block().bitrate();
+        }
+        // <--[mechanism]
+        // @object DiscordChannelTag
+        // @name user_limit
+        // @input ElementTag(Number)
+        // @description
+        // Set the channels user limit
+        // @tags
+        // <DiscordChannelTag.user_limit>
+        // -->
+        if (mechanism.matches("user_limit") && mechanism.requireInteger()) {
+            getChannel().getRestChannel().modify(ChannelModifyRequest.builder().userLimit(mechanism.getValue().asInt()).build(), null).block().userLimit();
+        }
+    }
+
+    @Override
+    public void applyProperty(Mechanism mechanism) {
+
     }
 }
