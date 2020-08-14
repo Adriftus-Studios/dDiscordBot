@@ -1,21 +1,23 @@
 package com.denizenscript.ddiscordbot.objects;
 
-import com.denizenscript.ddiscordbot.DiscordConnection;
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
+import com.denizenscript.ddiscordbot.DiscordConnection;
 import com.denizenscript.denizen.utilities.debugging.Debug;
-import com.denizenscript.denizencore.objects.*;
+import com.denizenscript.denizencore.objects.ArgumentHelper;
+import com.denizenscript.denizencore.objects.Fetchable;
+import com.denizenscript.denizencore.objects.ObjectTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.core.ListTag;
+import com.denizenscript.denizencore.tags.Attribute;
 import com.denizenscript.denizencore.tags.ObjectTagProcessor;
+import com.denizenscript.denizencore.tags.TagContext;
 import com.denizenscript.denizencore.tags.TagRunnable;
+import com.denizenscript.denizencore.utilities.CoreUtilities;
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Activity;
-import com.denizenscript.denizencore.tags.Attribute;
-import com.denizenscript.denizencore.tags.TagContext;
-import com.denizenscript.denizencore.utilities.CoreUtilities;
-import discord4j.common.util.Snowflake;
 
 import java.util.Optional;
 
@@ -129,7 +131,6 @@ public class DiscordUserTag implements ObjectTag {
         registerTag("name", (attribute, object) -> {
             return new ElementTag(object.cached != null ? object.cached.username : object.getUser().getUsername());
         });
-
         // <--[tag]
         // @attribute <DiscordUserTag.is_bot>
         // @returns ElementTag(Boolean)
@@ -183,7 +184,7 @@ public class DiscordUserTag implements ObjectTag {
         // Returns the raw mention string for the user.
         // -->
         registerTag("mention", (attribute, object) -> {
-            return new ElementTag("<@" + Snowflake.of(object.user_id).asString() + ">");
+            return new ElementTag(object.user.getMention());
         });
 
         // <--[tag]

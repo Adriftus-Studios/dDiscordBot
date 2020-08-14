@@ -2,17 +2,21 @@ package com.denizenscript.ddiscordbot;
 
 import com.denizenscript.ddiscordbot.events.*;
 import com.denizenscript.denizencore.utilities.debugging.Debug;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.InviteCreateEvent;
 import discord4j.core.event.domain.UserUpdateEvent;
+import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.event.domain.channel.*;
 import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.message.*;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.common.util.Snowflake;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
@@ -47,6 +51,12 @@ public class DiscordConnection {
                 autoHandle(event, DiscordReactionAddedScriptEvent.instance));
         events.on(ReactionRemoveEvent.class).subscribe(event ->
                 autoHandle(event, DiscordReactionRemovedScriptEvent.instance));
+        events.on(VoiceStateUpdateEvent.class).subscribe(event ->
+                autoHandle(event, DiscordVoiceStateUpdateScriptEvent.instance));
+        events.on(CategoryCreateEvent.class).subscribe(event ->
+                autoHandle(event, DiscordCategoryCreateScriptEvent.instance));
+        events.on(InviteCreateEvent.class).subscribe(event ->
+                autoHandle(event, DiscordInviteCreatedScriptEvent.instance));
     }
 
     public void autoHandle(Event event, DiscordScriptEvent scriptEvent) {
