@@ -2,27 +2,24 @@ package com.denizenscript.ddiscordbot.objects;
 
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
 import com.denizenscript.ddiscordbot.DiscordConnection;
-import com.denizenscript.denizencore.objects.ArgumentHelper;
-import com.denizenscript.denizencore.objects.Fetchable;
-import com.denizenscript.denizencore.objects.ObjectTag;
+import com.denizenscript.denizencore.objects.*;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.core.ListTag;
-import com.denizenscript.denizencore.objects.core.MapTag;
-import com.denizenscript.denizencore.tags.Attribute;
-import com.denizenscript.denizencore.tags.ObjectTagProcessor;
-import com.denizenscript.denizencore.tags.TagContext;
-import com.denizenscript.denizencore.tags.TagRunnable;
+import com.denizenscript.denizencore.tags.*;
+import com.denizenscript.denizencore.utilities.CoreUtilities;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.reaction.ReactionEmoji;
+
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DiscordMessageTag implements ObjectTag {
+public class DiscordMessageTag implements ObjectTag, Adjustable {
 
     @Fetchable("discordmessage")
     public static DiscordMessageTag valueOf(String string, TagContext context) {
@@ -106,6 +103,33 @@ public class DiscordMessageTag implements ObjectTag {
     public long message_id;
 
     public static void registerTags() {
+
+        TagManager.registerTagHandler(new TagRunnable.RootForm() {
+            public void run(ReplaceableTagEvent event) {
+                if (event.matches("discordemoji") && !event.replaced()) {
+                    DiscordEmojiTag tag = null;
+                    String context = event.getNameContext().replace("discordemoji[", "").replace("]", "");
+                    if (event.hasNameContext() && DiscordEmojiTag.matches(context)) {
+                        String bot = context.split(",")[0];
+                        String type = context.split(",")[1];
+                        String id = context.split(",")[2];
+                        if (type == "unicode") {
+                            tag = new DiscordEmojiTag(bot, ReactionEmoji.unicode(id));
+                        } else if (type.equalsIgnoreCase("custom")) {
+                            String name = context.split(",")[3];
+                            String animated = context.split(",")[4];
+                            tag = new DiscordEmojiTag(bot, ReactionEmoji.custom(Snowflake.of(Long.parseLong(id)), name, Boolean.valueOf(animated)));
+                        }
+                    }
+
+                    Attribute attribute = event.getAttributes().fulfill(1);
+
+                    if (tag != null) {
+                        event.setReplacedObject(CoreUtilities.autoAttrib(tag, attribute));
+                    }
+                }
+            }
+        }, "discordemoji");
 
         // <--[tag]
         // @attribute <DiscordMessageTag.id>
@@ -292,5 +316,51 @@ public class DiscordMessageTag implements ObjectTag {
             this.prefix = prefix;
         }
         return this;
+    }
+
+    @Override
+    public void adjust(Mechanism mechanism) {
+        // <--[mechanism]
+        // @object DiscordMessageTag
+        // @name add_reaction
+        // @input DiscordEmojiTag
+        // @description
+        // Forces the bot to add a reaction to a message
+        // @tags
+        // <DiscordMessageTag.reactions>
+        // -->
+        if (mechanism.matches("add_reaction")) {
+            message.addReaction(DiscordEmojiTag.valueOf(mechanism.getValue().asString(), null).emoji).block();
+        }
+        // <--[mechanism]
+        // @object DiscordMessageTag
+        // @name remove_reaction
+        // @input DiscordEmojiTag
+        // @description
+        // Forces the bot to remove a reaction to a message
+        // @tags
+        // <DiscordMessageTag.reactions>
+        // -->
+        if (mechanism.matches("remove_reaction")) {
+            User connection = DenizenDiscordBot.instance.connections.get(bot).client.getSelf().block();
+            message.removeReaction(DiscordEmojiTag.valueOf(mechanism.getValue().asString(), null).emoji, connection.getId()).block();
+        }
+        // <--[mechanism]
+        // @object DiscordMessageTag
+        // @name clear_reactions
+        // @input none
+        // @description
+        // Removes all reactions from a message
+        // @tags
+        // <DiscordMessageTag.reactions>
+        // -->
+        if (mechanism.matches("clear_reactions")) {
+            message.removeAllReactions().block();
+        }
+    }
+
+    @Override
+    public void applyProperty(Mechanism mechanism) {
+
     }
 }

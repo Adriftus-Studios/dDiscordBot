@@ -6,10 +6,7 @@ import com.denizenscript.denizencore.objects.ArgumentHelper;
 import com.denizenscript.denizencore.objects.Fetchable;
 import com.denizenscript.denizencore.objects.ObjectTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
-import com.denizenscript.denizencore.tags.Attribute;
-import com.denizenscript.denizencore.tags.ObjectTagProcessor;
-import com.denizenscript.denizencore.tags.TagContext;
-import com.denizenscript.denizencore.tags.TagRunnable;
+import com.denizenscript.denizencore.tags.*;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.reaction.ReactionEmoji;
 
@@ -45,6 +42,14 @@ public class DiscordEmojiTag implements ObjectTag {
         if (arg.startsWith("discordemoji@")) {
             return true;
         }
+        try {
+            String bot = arg.split(",")[1];
+            String type = arg.split(",")[2];
+            String id = arg.split(",")[3];
+            if (bot != null && type != null && id != null) {
+                return true;
+            }
+        } catch (Exception err) {}
         if (arg.contains("@")) {
             return false;
         }
@@ -74,17 +79,42 @@ public class DiscordEmojiTag implements ObjectTag {
         return emoji_id;
     }
 
-    public DiscordConnection getBot() {
+    public static DiscordConnection getBot() {
         return DenizenDiscordBot.instance.connections.get(bot);
     }
 
-    public String bot;
+    public static String bot;
 
     public ReactionEmoji emoji;
 
     public String emoji_id;
 
     public static void registerTags() {
+
+        TagManager.registerTagHandler(new TagRunnable.RootForm() {
+            public void run(ReplaceableTagEvent event) {
+                if (event.matches("discordemoji") && !event.replaced()) {
+                    DiscordEmojiTag tag = null;
+                    String context = event.getNameContext();
+                    if (event.hasNameContext() && DiscordEmojiTag.matches(context)) {
+                        String type = context.split(",")[1];
+                        String id = context.split(",")[2];
+                        if (type == "unicode") {
+                            tag = new DiscordEmojiTag(bot, ReactionEmoji.unicode(id));
+                        } else if (type == "custom") {
+                            String name = context.split(",")[3];
+                            String animated = context.split(",")[4];
+                            tag = new DiscordEmojiTag(bot, ReactionEmoji.custom(Snowflake.of(Long.parseLong(id)), name, Boolean.valueOf(animated)));
+                        }
+                    }
+
+                    if (tag != null) {
+                        event.setReplacedObject(tag);
+                    }
+                }
+            }
+        }, "discordemoji");
+
 
         // <--[tag]
         // @attribute <DiscordEmojiTag.id>
