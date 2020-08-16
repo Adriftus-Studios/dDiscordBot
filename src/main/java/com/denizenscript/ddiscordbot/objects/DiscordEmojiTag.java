@@ -162,6 +162,23 @@ public class DiscordEmojiTag implements ObjectTag {
             }
             return new ElementTag(animated);
         });
+
+        // <--[tag]
+        // @attribute <DiscordEmojiTag.formatted>
+        // @returns ElementTag
+        // @plugin dDiscordBot
+        // @description
+        // Returns the formatted emoji used in discord messages.
+        // -->
+        registerTag("formatted", (attribute, object) -> {
+            if (object.emoji.asCustomEmoji().isPresent()) {
+                return new ElementTag("<:" + object.emoji.asCustomEmoji().get().getName() + ":" + object.emoji.asCustomEmoji().get().getId().asLong() + ">");
+            } else if (object.emoji.asUnicodeEmoji().isPresent()) {
+                return new ElementTag(object.emoji.asUnicodeEmoji().get().getRaw());
+            }
+
+            return null;
+        });
     }
 
     public static ObjectTagProcessor<DiscordEmojiTag> tagProcessor = new ObjectTagProcessor<>();
