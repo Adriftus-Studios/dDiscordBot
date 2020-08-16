@@ -14,7 +14,6 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
-import org.bukkit.Bukkit;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -256,9 +255,6 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
             ListTag list = new ListTag();
             object.getBot().client.getGuildEmojis(object.message.getGuild().block().getId()).toStream().forEach((emoji) -> {
                 if(object.message.getContent().contains(emoji.asFormat())) {
-                    Bukkit.getOnlinePlayers().forEach((player) -> {
-                        player.sendMessage(emoji.getName() + " - " + emoji.asFormat());
-                    });
                     list.addObject(new DiscordEmojiTag(object.bot, ReactionEmoji.custom(emoji.getId(), emoji.getName(), emoji.isAnimated())));
                 }
             });

@@ -7,6 +7,7 @@ import com.denizenscript.denizencore.objects.Fetchable;
 import com.denizenscript.denizencore.objects.ObjectTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.tags.*;
+import com.denizenscript.denizencore.utilities.CoreUtilities;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.reaction.ReactionEmoji;
 
@@ -33,6 +34,7 @@ public class DiscordEmojiTag implements ObjectTag {
                 return new DiscordEmojiTag(bot, ReactionEmoji.custom(Snowflake.of(Long.parseLong(id)), name, Boolean.valueOf(animated)));
             }
         } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
             return null;
         }
         return null;
@@ -97,11 +99,12 @@ public class DiscordEmojiTag implements ObjectTag {
                     DiscordEmojiTag tag = null;
                     String context = event.getNameContext();
                     if (event.hasNameContext() && DiscordEmojiTag.matches(context)) {
+                        String bot = context.split(",")[0];
                         String type = context.split(",")[1];
                         String id = context.split(",")[2];
-                        if (type == "unicode") {
+                        if (type.equalsIgnoreCase("unicode")) {
                             tag = new DiscordEmojiTag(bot, ReactionEmoji.unicode(id));
-                        } else if (type == "custom") {
+                        } else if (type.equalsIgnoreCase("custom")) {
                             String name = context.split(",")[3];
                             String animated = context.split(",")[4];
                             tag = new DiscordEmojiTag(bot, ReactionEmoji.custom(Snowflake.of(Long.parseLong(id)), name, Boolean.valueOf(animated)));
@@ -109,7 +112,7 @@ public class DiscordEmojiTag implements ObjectTag {
                     }
 
                     if (tag != null) {
-                        event.setReplacedObject(tag);
+                        event.setReplacedObject(CoreUtilities.autoAttrib(tag, event.getAttributes().fulfill(1)));
                     }
                 }
             }
@@ -176,7 +179,6 @@ public class DiscordEmojiTag implements ObjectTag {
             } else if (object.emoji.asUnicodeEmoji().isPresent()) {
                 return new ElementTag(object.emoji.asUnicodeEmoji().get().getRaw());
             }
-
             return null;
         });
     }
