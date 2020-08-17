@@ -2,6 +2,7 @@ package com.denizenscript.ddiscordbot;
 
 import com.denizenscript.ddiscordbot.events.*;
 import com.denizenscript.ddiscordbot.objects.*;
+import com.denizenscript.denizencore.objects.core.ListTag;
 import com.denizenscript.denizencore.utilities.debugging.Debug;
 import com.denizenscript.denizencore.DenizenCore;
 import com.denizenscript.denizencore.events.ScriptEvent;
@@ -55,6 +56,23 @@ public class DenizenDiscordBot extends JavaPlugin {
                     discordTagBase(event);
                 }
             }, "discord");
+            // <--[tag]
+            // @attribute <ElementTag.urls>
+            // @returns ListTag
+            // @plugin dDiscordBot
+            // @description
+            // Returns a list of URLs in the element.
+            // Returns empty list if no URLs are found.
+            // -->
+            ElementTag.registerTag("urls", (attribute, object) -> {
+                ListTag list = new ListTag();
+                for (String s : object.asString().split("\\s+")) {
+                    if (s.matches("(https?://)[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")) {
+                        list.addObject(new ElementTag(s));
+                    }
+                }
+                return list;
+            });
         }
         catch (Throwable ex) {
             Debug.echoError(ex);

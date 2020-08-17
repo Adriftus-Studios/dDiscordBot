@@ -4,6 +4,7 @@ import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
 import com.denizenscript.ddiscordbot.objects.DiscordChannelTag;
 import com.denizenscript.ddiscordbot.objects.DiscordGroupTag;
+import com.denizenscript.ddiscordbot.objects.DiscordMessageTag;
 import com.denizenscript.ddiscordbot.objects.DiscordUserTag;
 import discord4j.core.event.domain.message.MessageUpdateEvent;
 import discord4j.core.object.entity.User;
@@ -38,7 +39,8 @@ public class DiscordMessageModifiedScriptEvent extends DiscordScriptEvent {
     // <context.author> returns the user that authored the message.
     // <context.mentions> returns a list of all mentioned users.
     // <context.is_direct> returns whether the message was sent directly to the bot (if false, the message was sent to a public channel).
-    // <context.message> returns the message (raw).
+    // <context.message> returns the message contents.
+    // <context.message_object> returns the DiscordMessageTag
     // <context.message_id> returns the message ID.
     // <context.no_mention_message> returns the message with all user mentions stripped.
     // <context.formatted_message> returns the formatted message (mentions/etc. are written cleanly). CURRENTLY NON-FUNCTIONAL.
@@ -100,6 +102,9 @@ public class DiscordMessageModifiedScriptEvent extends DiscordScriptEvent {
         }
         else if (name.equals("message")) {
             return new ElementTag(getEvent().getMessage().block().getContent());
+        }
+        else if (name.equals("message_object")) {
+            return new DiscordMessageTag(botID, getEvent().getMessage().block());
         }
         else if (name.equals("message_id")) {
             return new ElementTag(getEvent().getMessageId().asString());

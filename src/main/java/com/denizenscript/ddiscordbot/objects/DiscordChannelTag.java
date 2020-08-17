@@ -5,12 +5,9 @@ import com.denizenscript.ddiscordbot.DenizenDiscordBot;
 import com.denizenscript.denizen.utilities.debugging.Debug;
 import com.denizenscript.denizencore.objects.*;
 import com.denizenscript.denizencore.objects.core.ElementTag;
-import com.denizenscript.denizencore.tags.ObjectTagProcessor;
-import com.denizenscript.denizencore.tags.TagRunnable;
+import com.denizenscript.denizencore.tags.*;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.*;
-import com.denizenscript.denizencore.tags.Attribute;
-import com.denizenscript.denizencore.tags.TagContext;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -119,6 +116,21 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
     public long channel_id;
 
     public static void registerTags() {
+
+        TagManager.registerTagHandler(new TagRunnable.RootForm() {
+            public void run(ReplaceableTagEvent event) {
+                if (event.matches("discordchannel") && !event.replaced()) {
+                    DiscordChannelTag tag = null;
+                    if (event.hasNameContext()) {
+                        String context = event.getNameContext();
+                        tag = valueOf(context, event.getContext());
+                    }
+                    if (tag != null) {
+                        event.setReplacedObject(CoreUtilities.autoAttrib(tag, event.getAttributes().fulfill(1)));
+                    }
+                }
+            }
+        }, "discordchannel");
 
         // <--[tag]
         // @attribute <DiscordChannelTag.name>

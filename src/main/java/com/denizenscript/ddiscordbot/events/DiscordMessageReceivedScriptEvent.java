@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
 import com.denizenscript.ddiscordbot.objects.DiscordChannelTag;
 import com.denizenscript.ddiscordbot.objects.DiscordGroupTag;
+import com.denizenscript.ddiscordbot.objects.DiscordMessageTag;
 import com.denizenscript.ddiscordbot.objects.DiscordUserTag;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Attachment;
@@ -42,7 +43,8 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
     // <context.bot> returns the relevant Discord bot object.
     // <context.channel> returns the channel.
     // <context.group> returns the group.
-    // <context.message> returns the message (raw).
+    // <context.message> returns the message contents.
+    // <context.message_object> returns the DiscordMessageTag
     // <context.message_id> returns the message ID.
     // <context.no_mention_message> returns the message with all user mentions stripped.
     // <context.formatted_message> returns the formatted message (mentions/etc. are written cleanly).
@@ -86,6 +88,9 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
         }
         else if (name.equals("message")) {
             return new ElementTag(getEvent().getMessage().getContent());
+        }
+        else if (name.equals("message_object")) {
+            return new DiscordMessageTag(botID, getEvent().getMessage());
         }
         else if (name.equals("message_id")) {
             return new ElementTag(getEvent().getMessage().getId().asString());

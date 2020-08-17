@@ -8,6 +8,7 @@ import com.denizenscript.denizencore.objects.core.ListTag;
 import com.denizenscript.denizencore.tags.*;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
@@ -106,30 +107,18 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
 
         TagManager.registerTagHandler(new TagRunnable.RootForm() {
             public void run(ReplaceableTagEvent event) {
-                if (event.matches("discordemoji") && !event.replaced()) {
-                    DiscordEmojiTag tag = null;
-                    String context = event.getNameContext().replace("discordemoji[", "").replace("]", "");
-                    if (event.hasNameContext() && DiscordEmojiTag.matches(context)) {
-                        String bot = context.split(",")[0];
-                        String type = context.split(",")[1];
-                        String id = context.split(",")[2];
-                        if (type == "unicode") {
-                            tag = new DiscordEmojiTag(bot, ReactionEmoji.unicode(id));
-                        } else if (type.equalsIgnoreCase("custom")) {
-                            String name = context.split(",")[3];
-                            String animated = context.split(",")[4];
-                            tag = new DiscordEmojiTag(bot, ReactionEmoji.custom(Snowflake.of(Long.parseLong(id)), name, Boolean.valueOf(animated)));
-                        }
+                if (event.matches("discordmessage") && !event.replaced()) {
+                    DiscordMessageTag tag = null;
+                    if (event.hasNameContext()) {
+                        String context = event.getNameContext();
+                        tag = valueOf(context, event.getContext());
                     }
-
-                    Attribute attribute = event.getAttributes().fulfill(1);
-
                     if (tag != null) {
-                        event.setReplacedObject(CoreUtilities.autoAttrib(tag, attribute));
+                        event.setReplacedObject(CoreUtilities.autoAttrib(tag, event.getAttributes().fulfill(1)));
                     }
                 }
             }
-        }, "discordemoji");
+        }, "discordmessage");
 
         // <--[tag]
         // @attribute <DiscordMessageTag.id>
@@ -266,13 +255,45 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
         // @returns ListTag(DiscordEmojiTag)
         // @plugin dDiscordBot
         // @description
-        // Returns a map of DiscordEmojiTags with their counts.
+        // Returns a list of DiscordEmojiTags for reactions.
         // -->
         registerTag("reactions", (attribute, object) -> {
             ListTag list = new ListTag();
             object.message.getReactions().stream().forEach((obj) -> {
                 list.addObject(new DiscordEmojiTag(object.bot, obj.getEmoji()));
             });
+            return CoreUtilities.autoAttrib(list, attribute.fulfill(1));
+        });
+        // <--[tag]
+        // @attribute <DiscordMessageTag.attachments>
+        // @returns ListTag
+        // @plugin dDiscordBot
+        // @description
+        // Returns a list of attachments in the message.
+        // -->
+        registerTag("attachments", (attribute, object) -> {
+            ListTag list = new ListTag();
+            if (object.message.getAttachments().size() != 0) {
+                for (Attachment att : object.message.getAttachments()) {
+                    list.addObject(new ElementTag(att.getUrl()));
+                }
+            }
+            return list;
+        });
+        // <--[tag]
+        // @attribute <DiscordMessageTag.urls>
+        // @returns ListTag
+        // @plugin dDiscordBot
+        // @description
+        // Returns a list of URLs in the message.
+        // -->
+        registerTag("urls", (attribute, object) -> {
+            ListTag list = new ListTag();
+            for (String s : object.message.getContent().split("\\s+")) {
+                if (s.matches("(https?://)[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")) {
+                    list.addObject(new ElementTag(s));
+                }
+            }
             return list;
         });
     }

@@ -22,36 +22,38 @@ public class DiscordEmojiTag implements ObjectTag {
             return null;
         }
         try {
+            DiscordEmojiTag tag = null;
             String bot = string.split(",")[0];
             String type = string.split(",")[1];
+            String id = string.split(",")[2];
             if (type.equalsIgnoreCase("unicode")) {
-                String id = string.split(",")[2];
-                return new DiscordEmojiTag(bot, ReactionEmoji.unicode(id));
+                tag = new DiscordEmojiTag(bot, ReactionEmoji.unicode(id));
             } else if (type.equalsIgnoreCase("custom")) {
-                String id = string.split(",")[2];
                 String name = string.split(",")[3];
                 String animated = string.split(",")[4];
-                return new DiscordEmojiTag(bot, ReactionEmoji.custom(Snowflake.of(Long.parseLong(id)), name, Boolean.valueOf(animated)));
+                tag = new DiscordEmojiTag(bot, ReactionEmoji.custom(Snowflake.of(Long.parseLong(id)), name, Boolean.valueOf(animated)));
             }
+            return tag;
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
             return null;
         }
-        return null;
     }
 
     public static boolean matches(String arg) {
+        System.out.println(arg);
         if (arg.startsWith("discordemoji@")) {
             return true;
         }
         try {
-            String bot = arg.split(",")[1];
-            String type = arg.split(",")[2];
-            String id = arg.split(",")[3];
+            String bot = arg.split(",")[0];
+            String type = arg.split(",")[1];
+            String id = arg.split(",")[2];
             if (bot != null && type != null && id != null) {
                 return true;
             }
         } catch (Exception err) {}
+        System.out.println("false");
         if (arg.contains("@")) {
             return false;
         }
@@ -97,20 +99,10 @@ public class DiscordEmojiTag implements ObjectTag {
             public void run(ReplaceableTagEvent event) {
                 if (event.matches("discordemoji") && !event.replaced()) {
                     DiscordEmojiTag tag = null;
-                    String context = event.getNameContext();
-                    if (event.hasNameContext() && DiscordEmojiTag.matches(context)) {
-                        String bot = context.split(",")[0];
-                        String type = context.split(",")[1];
-                        String id = context.split(",")[2];
-                        if (type.equalsIgnoreCase("unicode")) {
-                            tag = new DiscordEmojiTag(bot, ReactionEmoji.unicode(id));
-                        } else if (type.equalsIgnoreCase("custom")) {
-                            String name = context.split(",")[3];
-                            String animated = context.split(",")[4];
-                            tag = new DiscordEmojiTag(bot, ReactionEmoji.custom(Snowflake.of(Long.parseLong(id)), name, Boolean.valueOf(animated)));
-                        }
+                    if (event.hasNameContext()) {
+                        String context = event.getNameContext();
+                        tag = valueOf(context, event.getContext());
                     }
-
                     if (tag != null) {
                         event.setReplacedObject(CoreUtilities.autoAttrib(tag, event.getAttributes().fulfill(1)));
                     }
