@@ -82,6 +82,7 @@ public class DiscordUserTag implements ObjectTag {
     public DiscordUserTag(String bot, long userId) {
         this.bot = bot;
         this.user_id = userId;
+        this.user = DenizenDiscordBot.instance.connections.get(bot).client.getUserById(Snowflake.of(userId)).block();
     }
 
     public DiscordUserTag(String bot, User user) {
@@ -93,6 +94,7 @@ public class DiscordUserTag implements ObjectTag {
     public DiscordUserTag(String bot, DiscordConnection.UserCache user) {
         this.bot = bot;
         this.cached = user;
+        this.user = DenizenDiscordBot.instance.connections.get(bot).client.getUserById(Snowflake.of(user.id)).block();
         user_id = user.id;
     }
 

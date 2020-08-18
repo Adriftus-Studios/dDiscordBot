@@ -114,26 +114,20 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
             return new ElementTag(m);
         }
         else if (name.equals("attachments")) {
-            DenizenDiscordBot.userContextDeprecation.warn();
-            if (getEvent().getMessage().getAttachments().size() != 0) {
-                ListTag list = new ListTag();
-                for (Attachment att : getEvent().getMessage().getAttachments()) {
-                    list.addObject(new ElementTag(att.getUrl()));
-                }
-                return list;
+            ListTag list = new ListTag();
+            for (Attachment att : getEvent().getMessage().getAttachments()) {
+                list.addObject(new ElementTag(att.getUrl()));
             }
+            return list;
         }
         else if (name.equals("urls")) {
-            DenizenDiscordBot.userContextDeprecation.warn();
             ListTag list = new ListTag();
             for (String s : getEvent().getMessage().getContent().split("\\s+")) {
                 if (s.matches("(https?://)[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")) {
                     list.addObject(new ElementTag(s));
                 }
             }
-            if(list.size() != 0) {
-                return list;
-            }
+            return list;
         }
         else if (name.equals("author")) {
             if (!getEvent().getMessage().getAuthor().isPresent()) {
@@ -152,13 +146,6 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
         else if (name.equals("is_direct")) {
             return new ElementTag(!(getEvent().getMessage().getChannel().block() instanceof GuildChannel));
         }
-        else if (name.equals("channel_name")) {
-            DenizenDiscordBot.userContextDeprecation.warn();
-            MessageChannel channel = getEvent().getMessage().getChannel().block();
-            if (channel instanceof GuildChannel) {
-                return new ElementTag(((GuildChannel) channel).getName());
-            }
-        }
         else if (name.equals("mention_names")) {
             DenizenDiscordBot.userContextDeprecation.warn();
             ListTag list = new ListTag();
@@ -166,12 +153,6 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
                 list.add(String.valueOf(user.getUsername()));
             }
             return list;
-        }
-        else if (name.equals("group_name")) {
-            DenizenDiscordBot.userContextDeprecation.warn();
-            if (getEvent().getGuildId().isPresent()) {
-                return new ElementTag(getEvent().getGuild().block().getName());
-            }
         }
         return super.getContext(name);
     }
