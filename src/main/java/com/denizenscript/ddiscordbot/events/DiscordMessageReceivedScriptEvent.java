@@ -43,8 +43,7 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
     // <context.bot> returns the relevant Discord bot object.
     // <context.channel> returns the channel.
     // <context.group> returns the group.
-    // <context.message> returns the message contents.
-    // <context.message_object> returns the DiscordMessageTag
+    // <context.message> returns the DiscordMessageTag.
     // <context.message_id> returns the message ID.
     // <context.no_mention_message> returns the message with all user mentions stripped.
     // <context.formatted_message> returns the formatted message (mentions/etc. are written cleanly).
@@ -87,9 +86,6 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
             }
         }
         else if (name.equals("message")) {
-            return new ElementTag(getEvent().getMessage().getContent());
-        }
-        else if (name.equals("message_object")) {
             return new DiscordMessageTag(botID, getEvent().getMessage());
         }
         else if (name.equals("message_id")) {
@@ -122,6 +118,7 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
             return new ElementTag(m);
         }
         else if (name.equals("attachments")) {
+            DenizenDiscordBot.userContextDeprecation.warn();
             if (getEvent().getMessage().getAttachments().size() != 0) {
                 ListTag list = new ListTag();
                 for (Attachment att : getEvent().getMessage().getAttachments()) {
@@ -131,6 +128,7 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
             }
         }
         else if (name.equals("urls")) {
+            DenizenDiscordBot.userContextDeprecation.warn();
             ListTag list = new ListTag();
             for (String s : getEvent().getMessage().getContent().split("\\s+")) {
                 if (s.matches("(https?://)[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")) {
@@ -148,6 +146,7 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
             return new DiscordUserTag(botID, getEvent().getMessage().getAuthor().get());
         }
         else if (name.equals("mentions")) {
+            DenizenDiscordBot.userContextDeprecation.warn();
             ListTag list = new ListTag();
             for (Snowflake user : getEvent().getMessage().getUserMentionIds()) {
                 list.addObject(new DiscordUserTag(botID, user.asLong()));

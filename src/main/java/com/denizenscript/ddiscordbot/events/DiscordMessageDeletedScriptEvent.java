@@ -41,8 +41,7 @@ public class DiscordMessageDeletedScriptEvent extends DiscordScriptEvent {
     // <context.mentions> returns a list of all mentioned users.
     // <context.is_direct> returns whether the message was sent directly to the bot (if false, the message was sent to a public channel).
     // <context.old_message_valid> returns whether the old message is available (it may be lost due to caching).
-    // <context.message> returns the message contents.
-    // <context.message_object> returns the DiscordMessageTag
+    // <context.message> returns the DiscordMessageTag.
     // <context.message_id> returns the message ID.
     // <context.no_mention_message> returns the original message with all user mentions stripped.
     // <context.formatted_message> returns the formatted original message (mentions/etc. are written cleanly). CURRENTLY NON-FUNCTIONAL.
@@ -84,14 +83,10 @@ public class DiscordMessageDeletedScriptEvent extends DiscordScriptEvent {
             return new ElementTag(getEvent().getMessage().isPresent());
         }
         else if (name.equals("message")) {
-            if (getEvent().getMessage().isPresent()) {
-                return new ElementTag(getEvent().getMessage().get().getContent());
-            }
-        }
-        else if (name.equals("message_object")) {
             return new DiscordMessageTag(botID, getEvent().getMessage().get());
         }
         else if (name.equals("message_id")) {
+            DenizenDiscordBot.userContextDeprecation.warn();
             return new ElementTag(getEvent().getMessageId().asString());
         }
         else if (name.equals("no_mention_message")) {
@@ -109,6 +104,7 @@ public class DiscordMessageDeletedScriptEvent extends DiscordScriptEvent {
             return new DiscordUserTag(botID, getEvent().getMessage().get().getAuthor().get());
         }
         else if (name.equals("mentions")) {
+            DenizenDiscordBot.userContextDeprecation.warn();
             if (getEvent().getMessage().isPresent()) {
                 ListTag list = new ListTag();
                 for (Snowflake user : getEvent().getMessage().get().getUserMentionIds()) {

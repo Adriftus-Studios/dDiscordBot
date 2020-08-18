@@ -5,6 +5,7 @@ import com.denizenscript.ddiscordbot.DiscordConnection;
 import com.denizenscript.denizencore.objects.*;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.core.ListTag;
+import com.denizenscript.denizencore.objects.core.MapTag;
 import com.denizenscript.denizencore.tags.*;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
 import discord4j.common.util.Snowflake;
@@ -219,17 +220,32 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
 
         // <--[tag]
         // @attribute <DiscordMessageTag.mentions>
-        // @returns ListTag(DiscordUserTag)
+        // @returns MapTag(ElementTag/DiscordUserTag)
         // @plugin dDiscordBot
         // @description
-        // Returns a list of users mentioned in the message.
+        // Returns a map of replaced user IDs along with the DiscordUserTag.
         // -->
         registerTag("mentions", (attribute, object) -> {
-            ListTag list = new ListTag();
-            for (Snowflake u : object.getMessage().getUserMentionIds()) {
-                list.addObject(new DiscordUserTag(object.bot, object.getBot().client.getUserById(u).block()));
+            MapTag map = new MapTag();
+            for (User u : object.getMessage().getUserMentions().collectList().block()) {
+                map.putObject(u.getMention(), new DiscordUserTag(object.bot, u));
             }
-            return list;
+            return map;
+        });
+
+        // <--[tag]
+        // @attribute <DiscordMessageTag.formatted_mentions>
+        // @returns MapTag(ElementTag/DiscordUserTag)
+        // @plugin dDiscordBot
+        // @description
+        // Returns a map of replaced user display tags along with the DiscordUserTag.
+        // -->
+        registerTag("formatted_mentions", (attribute, object) -> {
+            MapTag map = new MapTag();
+            for (User u : object.getMessage().getUserMentions().collectList().block()) {
+                map.putObject(u.getUsername(), new DiscordUserTag(object.bot, u));
+            }
+            return map;
         });
 
         // <--[tag]
