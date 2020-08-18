@@ -35,14 +35,13 @@ public class DiscordMessageDeletedScriptEvent extends DiscordScriptEvent {
     //
     // @Context
     // <context.bot> returns the relevant Discord bot object.
-    // <context.channel> returns the channel.
-    // <context.group> returns the group.
+    // <context.channel> returns the DiscordChannelTag.
+    // <context.group> returns the DiscordGroupTag.
     // <context.author> returns the user that authored the message.
     // <context.mentions> returns a list of all mentioned users.
     // <context.is_direct> returns whether the message was sent directly to the bot (if false, the message was sent to a public channel).
     // <context.old_message_valid> returns whether the old message is available (it may be lost due to caching).
     // <context.message> returns the DiscordMessageTag.
-    // <context.message_id> returns the message ID.
     // <context.no_mention_message> returns the original message with all user mentions stripped.
     // <context.formatted_message> returns the formatted original message (mentions/etc. are written cleanly). CURRENTLY NON-FUNCTIONAL.
     //
@@ -85,10 +84,6 @@ public class DiscordMessageDeletedScriptEvent extends DiscordScriptEvent {
         else if (name.equals("message")) {
             return new DiscordMessageTag(botID, getEvent().getMessage().get());
         }
-        else if (name.equals("message_id")) {
-            DenizenDiscordBot.userContextDeprecation.warn();
-            return new ElementTag(getEvent().getMessageId().asString());
-        }
         else if (name.equals("no_mention_message")) {
             if (getEvent().getMessage().isPresent()) {
                 return new ElementTag(stripMentions(getEvent().getMessage().get().getContent(),
@@ -115,31 +110,6 @@ public class DiscordMessageDeletedScriptEvent extends DiscordScriptEvent {
         }
         else if (name.equals("is_direct")) {
             return new ElementTag(!(getEvent().getChannel().block() instanceof GuildChannel));
-        }
-        else if (name.equals("channel_name")) {
-            DenizenDiscordBot.userContextDeprecation.warn();
-            MessageChannel channel = getEvent().getChannel().block();
-            if (channel instanceof GuildChannel) {
-                return new ElementTag(((GuildChannel) channel).getName());
-            }
-        }
-        else if (name.equals("group_name")) {
-            DenizenDiscordBot.userContextDeprecation.warn();
-            if (getEvent().getChannel().block() instanceof GuildChannel) {
-                return new ElementTag(((GuildChannel) getEvent().getChannel().block()).getGuild().block().getName());
-            }
-        }
-        else if (name.equals("author_id")) {
-            DenizenDiscordBot.userContextDeprecation.warn();
-            if (getEvent().getMessage().isPresent()) {
-                return new ElementTag(getEvent().getMessage().get().getAuthor().get().getId().asLong());
-            }
-        }
-        else if (name.equals("author_name")) {
-            DenizenDiscordBot.userContextDeprecation.warn();
-            if (getEvent().getMessage().isPresent()) {
-                return new ElementTag(getEvent().getMessage().get().getAuthor().get().getUsername());
-            }
         }
         else if (name.equals("mention_names")) {
             DenizenDiscordBot.userContextDeprecation.warn();

@@ -41,10 +41,9 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
     //
     // @Context
     // <context.bot> returns the relevant Discord bot object.
-    // <context.channel> returns the channel.
-    // <context.group> returns the group.
+    // <context.channel> returns the DiscordChannelTag.
+    // <context.group> returns the DiscordGroupTag.
     // <context.message> returns the DiscordMessageTag.
-    // <context.message_id> returns the message ID.
     // <context.no_mention_message> returns the message with all user mentions stripped.
     // <context.formatted_message> returns the formatted message (mentions/etc. are written cleanly).
     // <context.attachments> returns a list with URLs for all attachments, returns null if no attachments.
@@ -87,9 +86,6 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
         }
         else if (name.equals("message")) {
             return new DiscordMessageTag(botID, getEvent().getMessage());
-        }
-        else if (name.equals("message_id")) {
-            return new ElementTag(getEvent().getMessage().getId().asString());
         }
         else if (name.equals("no_mention_message")) {
             return new ElementTag(stripMentions(getEvent().getMessage().getContent(),
@@ -176,14 +172,6 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
             if (getEvent().getGuildId().isPresent()) {
                 return new ElementTag(getEvent().getGuild().block().getName());
             }
-        }
-        else if (name.equals("author_id")) {
-            DenizenDiscordBot.userContextDeprecation.warn();
-            return new ElementTag(getEvent().getMessage().getAuthor().get().getId().asLong());
-        }
-        else if (name.equals("author_name")) {
-            DenizenDiscordBot.userContextDeprecation.warn();
-            return new ElementTag(getEvent().getMessage().getAuthor().get().getUsername());
         }
         return super.getContext(name);
     }
