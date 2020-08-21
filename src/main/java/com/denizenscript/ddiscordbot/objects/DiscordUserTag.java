@@ -3,9 +3,7 @@ package com.denizenscript.ddiscordbot.objects;
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
 import com.denizenscript.ddiscordbot.DiscordConnection;
 import com.denizenscript.denizen.utilities.debugging.Debug;
-import com.denizenscript.denizencore.objects.ArgumentHelper;
-import com.denizenscript.denizencore.objects.Fetchable;
-import com.denizenscript.denizencore.objects.ObjectTag;
+import com.denizenscript.denizencore.objects.*;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.core.ListTag;
 import com.denizenscript.denizencore.tags.*;
@@ -18,7 +16,7 @@ import discord4j.core.object.presence.Activity;
 
 import java.util.Optional;
 
-public class DiscordUserTag implements ObjectTag {
+public class DiscordUserTag implements ObjectTag, Adjustable {
 
     // <--[language]
     // @name DiscordUserTag Objects
@@ -376,5 +374,40 @@ public class DiscordUserTag implements ObjectTag {
             this.prefix = prefix;
         }
         return this;
+    }
+
+    @Override
+    public void adjust(Mechanism mechanism) {
+        // <--[mechanism]
+        // @object DiscordUserTag
+        // @name add_role
+        // @input DiscordRoleTag
+        // @description
+        // Adds the user to a specific role.
+        // @tags
+        // <DiscordUserTag.roles>
+        // -->
+        if (mechanism.matches("add_role")) {
+            Role r = DiscordRoleTag.valueOf(mechanism.getValue().asString(), null).role;
+            getUser().asMember(r.getGuildId()).block().addRole(r.getId()).block();
+        }
+        // <--[mechanism]
+        // @object DiscordUserTag
+        // @name remove_role
+        // @input DiscordRoleTag
+        // @description
+        // Removes the user from a specific role.
+        // @tags
+        // <DiscordUserTag.roles>
+        // -->
+        if (mechanism.matches("remove_role")) {
+            Role r = DiscordRoleTag.valueOf(mechanism.getValue().asString(), null).role;
+            getUser().asMember(r.getGuildId()).block().addRole(r.getId()).block();
+        }
+    }
+
+    @Override
+    public void applyProperty(Mechanism mechanism) {
+
     }
 }
