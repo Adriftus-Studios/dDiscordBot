@@ -13,6 +13,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Activity;
+import org.bukkit.Bukkit;
 
 import java.util.Optional;
 
@@ -378,32 +379,38 @@ public class DiscordUserTag implements ObjectTag, Adjustable {
 
     @Override
     public void adjust(Mechanism mechanism) {
-        // <--[mechanism]
-        // @object DiscordUserTag
-        // @name add_role
-        // @input DiscordRoleTag
-        // @description
-        // Adds the user to a specific role.
-        // @tags
-        // <DiscordUserTag.roles>
-        // -->
-        if (mechanism.matches("add_role")) {
-            Role r = DiscordRoleTag.valueOf(mechanism.getValue().asString(), null).role;
-            getUser().asMember(r.getGuildId()).block().addRole(r.getId()).block();
-        }
-        // <--[mechanism]
-        // @object DiscordUserTag
-        // @name remove_role
-        // @input DiscordRoleTag
-        // @description
-        // Removes the user from a specific role.
-        // @tags
-        // <DiscordUserTag.roles>
-        // -->
-        if (mechanism.matches("remove_role")) {
-            Role r = DiscordRoleTag.valueOf(mechanism.getValue().asString(), null).role;
-            getUser().asMember(r.getGuildId()).block().addRole(r.getId()).block();
-        }
+        // using runnables to prevent mech server lag
+        Bukkit.getScheduler().runTask(DenizenDiscordBot.instance, new Runnable() {
+            @Override
+            public void run() {
+                // <--[mechanism]
+                // @object DiscordUserTag
+                // @name add_role
+                // @input DiscordRoleTag
+                // @description
+                // Adds the user to a specific role.
+                // @tags
+                // <DiscordUserTag.roles>
+                // -->
+                if (mechanism.matches("add_role")) {
+                    Role r = DiscordRoleTag.valueOf(mechanism.getValue().asString(), null).role;
+                    getUser().asMember(r.getGuildId()).block().addRole(r.getId()).block();
+                }
+                // <--[mechanism]
+                // @object DiscordUserTag
+                // @name remove_role
+                // @input DiscordRoleTag
+                // @description
+                // Removes the user from a specific role.
+                // @tags
+                // <DiscordUserTag.roles>
+                // -->
+                if (mechanism.matches("remove_role")) {
+                    Role r = DiscordRoleTag.valueOf(mechanism.getValue().asString(), null).role;
+                    getUser().asMember(r.getGuildId()).block().addRole(r.getId()).block();
+                }
+            }
+        });
     }
 
     @Override

@@ -1,9 +1,6 @@
 package com.denizenscript.ddiscordbot;
 
-import com.denizenscript.ddiscordbot.objects.DiscordChannelTag;
-import com.denizenscript.ddiscordbot.objects.DiscordGroupTag;
-import com.denizenscript.ddiscordbot.objects.DiscordRoleTag;
-import com.denizenscript.ddiscordbot.objects.DiscordUserTag;
+import com.denizenscript.ddiscordbot.objects.*;
 import com.denizenscript.denizencore.objects.Argument;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
@@ -28,6 +25,7 @@ import discord4j.store.jdk.JdkStoreService;
 import org.bukkit.Bukkit;
 import reactor.core.publisher.Mono;
 
+import java.lang.reflect.Field;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.function.Function;
@@ -129,9 +127,13 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
     // Use to delete a message the bot has already sent.
     // - ~discord id:mybot delete_message channel:<[channel]> message_id:<[msg]>
     //
+    // @Usage
+    // Use to send embedded messages.
+    // - ~discord id:mybot send_embed channel:<[channel]> embed:<discordembed.title[test].description[something]>
+    //
     // -->
 
-    public enum DiscordInstruction { CONNECT, DISCONNECT, MESSAGE, ADD_ROLE, REMOVE_ROLE, STATUS, RENAME, START_TYPING, STOP_TYPING, EDIT_MESSAGE, DELETE_MESSAGE }
+    public enum DiscordInstruction { CONNECT, DISCONNECT, MESSAGE, ADD_ROLE, REMOVE_ROLE, STATUS, RENAME, START_TYPING, STOP_TYPING, EDIT_MESSAGE, DELETE_MESSAGE, SEND_EMBED }
 
     @Override
     public void parseArgs(ScriptEntry scriptEntry) throws InvalidArgumentsException {
@@ -148,6 +150,11 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
             else if (!scriptEntry.hasObject("code")
                     && arg.matchesPrefix("code")) {
                 scriptEntry.addObject("code", arg.asElement());
+            }
+            else if (!scriptEntry.hasObject("embed")
+                    && arg.matchesPrefix("embed")
+                    && arg.matchesArgumentType(DiscordEmbedTag.class)) {
+                scriptEntry.addObject("embed", arg.asType(DiscordEmbedTag.class));
             }
             else if (!scriptEntry.hasObject("channel")
                     && arg.matchesPrefix("channel")
@@ -187,6 +194,10 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
             }
             else if (!scriptEntry.hasObject("message")) {
                 scriptEntry.addObject("message", new ElementTag(arg.raw_value));
+            }
+            else if (!scriptEntry.hasObject("embed")
+                    && arg.matchesArgumentType(DiscordEmbedTag.class)) {
+                scriptEntry.addObject("embed", arg.asType(DiscordEmbedTag.class));
             }
             else {
                 arg.reportUnhandled();
@@ -323,6 +334,38 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
                     scriptEntry.setFinished(true);
                     break;
                 }
+                case SEND_EMBED: {
+                    DiscordEmbedTag embed = scriptEntry.getObjectTag("embed");
+                    if (channel == null && user == null) {
+                        if (!requireChannel.get()) {
+                            requireUser.get();
+                        }
+                        scriptEntry.setFinished(true);
+                        return;
+                    }
+                    if (requireClientID.get()) {
+                        return;
+                    }
+                    GatewayDiscordClient client = DenizenDiscordBot.instance.connections.get(id.asString()).client;
+                    if (requireClientObject.apply(client)) {
+                        return;
+                    }
+                    if (embed != null) {
+                        TextChannel c = (TextChannel) client.getChannelById(Snowflake.of(channel.channel_id)).block();
+                        Message m = c.createEmbed(e -> {
+                            try {
+                                Field f = e.getClass().getDeclaredField("requestBuilder");
+                                f.setAccessible(true);
+                                f.set(e, embed.builder);
+                            } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
+                                noSuchFieldException.printStackTrace();
+                            }
+                        }).block();
+                        scriptEntry.addObject("message_id", new ElementTag(m.getId().asString()));
+                        scriptEntry.setFinished(true);
+                    }
+                    break;
+                }
                 case MESSAGE: {
                     if (channel == null && user == null) {
                         if (!requireChannel.get()) {
@@ -349,14 +392,17 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
                                 .doOnError(Debug::echoError).subscribe();
                     }
                     else {
-                        client.getChannelById(Snowflake.of(channel.channel_id))
-                                .flatMap(chan -> ((TextChannel) chan).createMessage(message.asString()))
-                                .map(m -> {
-                                    scriptEntry.addObject("message_id", new ElementTag(m.getId().asString()));
-                                    scriptEntry.setFinished(true);
-                                    return m;
-                                })
-                                .doOnError(Debug::echoError).subscribe();
+                        if (message != null) {
+                            client.getChannelById(Snowflake.of(channel.channel_id))
+                                    .flatMap(chan -> ((TextChannel) chan).createMessage(message.asString()))
+                                    .map(m -> {
+
+                                        scriptEntry.addObject("message_id", new ElementTag(m.getId().asString()));
+                                        scriptEntry.setFinished(true);
+                                        return m;
+                                    })
+                                    .doOnError(Debug::echoError).subscribe();
+                        }
                     }
                     break;
                 }

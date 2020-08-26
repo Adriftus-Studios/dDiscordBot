@@ -50,6 +50,7 @@ public class DenizenDiscordBot extends JavaPlugin {
             ObjectFetcher.registerWithObjectFetcher(DiscordUserTag.class, DiscordUserTag.tagProcessor);
             ObjectFetcher.registerWithObjectFetcher(DiscordMessageTag.class, DiscordMessageTag.tagProcessor);
             ObjectFetcher.registerWithObjectFetcher(DiscordEmojiTag.class, DiscordEmojiTag.tagProcessor);
+            ObjectFetcher.registerWithObjectFetcher(DiscordEmbedTag.class, DiscordEmbedTag.tagProcessor);
             TagManager.registerTagHandler(new TagRunnable.RootForm() {
                 @Override
                 public void run(ReplaceableTagEvent event) {

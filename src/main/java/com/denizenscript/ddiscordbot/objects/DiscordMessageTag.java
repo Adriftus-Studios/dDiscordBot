@@ -305,10 +305,10 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
         // -->
         registerTag("urls", (attribute, object) -> {
             ListTag list = new ListTag();
-            for (String s : object.message.getContent().split("\\s+")) {
-                if (s.matches("(https?://)[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")) {
-                    list.addObject(new ElementTag(s));
-                }
+            final Pattern URL_PATTERN = Pattern.compile("(https?://)[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)");
+            Matcher matcher = URL_PATTERN.matcher(object.message.getContent());
+            while (matcher.find()) {
+                list.addObject(new ElementTag(matcher.group(1)));
             }
             return list;
         });
