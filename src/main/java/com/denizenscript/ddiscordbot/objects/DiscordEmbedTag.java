@@ -3,6 +3,7 @@ package com.denizenscript.ddiscordbot.objects;
 import com.denizenscript.denizencore.objects.ArgumentHelper;
 import com.denizenscript.denizencore.objects.Fetchable;
 import com.denizenscript.denizencore.objects.ObjectTag;
+import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.tags.*;
 import com.denizenscript.denizencore.tags.core.EscapeTagBase;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
@@ -20,7 +21,6 @@ public class DiscordEmbedTag implements ObjectTag {
     @Fetchable("discordembed")
     public static DiscordEmbedTag valueOf(String string, TagContext context) {
         DiscordEmbedTag tag = new DiscordEmbedTag();
-        System.out.println(string);
         //TODO
         return tag;
     }
@@ -50,8 +50,35 @@ public class DiscordEmbedTag implements ObjectTag {
     public ImmutableEmbedThumbnailData.Builder thumbnailBuilder;
     public ImmutableEmbedProviderData.Builder providerBuilder;
 
+    public ImmutableEmbedData.Builder build() {
+        ImmutableEmbedData.Builder b = this.builder;
+        if(authorBuilder != null) {
+            b = b.author(authorBuilder.build());
+        }
+        if(footerBuilder != null) {
+            b = b.footer(footerBuilder.build());
+        }
+        if(imageBuilder != null) {
+            b = b.image(imageBuilder.build());
+        }
+        if(videoBuilder != null) {
+            b = b.video(videoBuilder.build());
+        }
+        if(thumbnailBuilder != null) {
+            b = b.thumbnail(thumbnailBuilder.build());
+        }
+        if(providerBuilder != null) {
+            b = b.provider(providerBuilder.build());
+        }
+        return b;
+    }
+
     public DiscordEmbedTag() {
         builder = ImmutableEmbedData.builder();
+    }
+
+    public DiscordEmbedTag(EmbedData data) {
+        builder = ImmutableEmbedData.builder().from(data);
     }
 
     public static void registerTags() {
@@ -63,6 +90,10 @@ public class DiscordEmbedTag implements ObjectTag {
             }
         }, "discordembed");
         registerTag("author_name", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isAuthorPresent() && !object.builder.build().author().get().name().isAbsent() ?
+                        object.builder.build().author().get().name().get() : "null");
+            }
             if(object.authorBuilder == null) {
                 object.authorBuilder = EmbedAuthorData.builder();
             }
@@ -70,6 +101,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("author_url", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isAuthorPresent() && !object.builder.build().author().get().url().isAbsent() ?
+                        object.builder.build().author().get().url().get() : "null");
+            }
             if(object.authorBuilder == null) {
                 object.authorBuilder = EmbedAuthorData.builder();
             }
@@ -77,6 +112,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("author_icon_url", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isAuthorPresent() && !object.builder.build().author().get().iconUrl().isAbsent() ?
+                        object.builder.build().author().get().iconUrl().get() : "null");
+            }
             if(object.authorBuilder == null) {
                 object.authorBuilder = EmbedAuthorData.builder();
             }
@@ -84,6 +123,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("footer_text", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isFooterPresent() ?
+                        object.builder.build().footer().get().text() : "null");
+            }
             if(object.footerBuilder == null) {
                 object.footerBuilder = EmbedFooterData.builder();
             }
@@ -91,6 +134,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("footer_icon_url", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isFooterPresent() && !object.builder.build().footer().get().iconUrl().isAbsent() ?
+                        object.builder.build().footer().get().iconUrl().get() : "null");
+            }
             if(object.footerBuilder == null) {
                 object.footerBuilder = EmbedFooterData.builder();
             }
@@ -98,6 +145,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("image_url", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isImagePresent() && !object.builder.build().image().get().url().isAbsent() ?
+                        object.builder.build().image().get().url().get() : "null");
+            }
             if(object.imageBuilder == null) {
                 object.imageBuilder = EmbedImageData.builder();
             }
@@ -105,6 +156,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("image_width", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isImagePresent() && !object.builder.build().image().get().width().isAbsent() ?
+                        String.valueOf(object.builder.build().image().get().width().get()) : "null");
+            }
             if(object.imageBuilder == null) {
                 object.imageBuilder = EmbedImageData.builder();
             }
@@ -112,6 +167,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("image_height", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isImagePresent() && !object.builder.build().image().get().height().isAbsent() ?
+                        String.valueOf(object.builder.build().image().get().height().get()) : "null");
+            }
             if(object.imageBuilder == null) {
                 object.imageBuilder = EmbedImageData.builder();
             }
@@ -119,6 +178,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("video_url", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isVideoPresent() && !object.builder.build().video().get().url().isAbsent() ?
+                        object.builder.build().video().get().url().get() : "null");
+            }
             if(object.videoBuilder == null) {
                 object.videoBuilder = EmbedVideoData.builder();
             }
@@ -126,6 +189,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("video_width", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isVideoPresent() && !object.builder.build().video().get().width().isAbsent() ?
+                        String.valueOf(object.builder.build().video().get().width().get()) : "null");
+            }
             if(object.videoBuilder == null) {
                 object.videoBuilder = EmbedVideoData.builder();
             }
@@ -133,6 +200,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("video_height", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isVideoPresent() && !object.builder.build().video().get().height().isAbsent() ?
+                        String.valueOf(object.builder.build().video().get().height().get()) : "null");
+            }
             if(object.videoBuilder == null) {
                 object.videoBuilder = EmbedVideoData.builder();
             }
@@ -140,13 +211,21 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("thumbnail_url", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isThumbnailPresent() && !object.builder.build().thumbnail().get().url().isAbsent() ?
+                        object.builder.build().thumbnail().get().url().get() : "null");
+            }
             if(object.thumbnailBuilder == null) {
                 object.thumbnailBuilder = EmbedThumbnailData.builder();
             }
             object.thumbnailBuilder.url(attribute.getContext(1));
             return object;
         });
-        registerTag("thumbnail_url", (attribute, object) -> {
+        registerTag("thumbnail_width", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isThumbnailPresent() && !object.builder.build().thumbnail().get().width().isAbsent() ?
+                        String.valueOf(object.builder.build().thumbnail().get().width().get()) : "null");
+            }
             if(object.thumbnailBuilder == null) {
                 object.thumbnailBuilder = EmbedThumbnailData.builder();
             }
@@ -154,6 +233,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("thumbnail_height", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isThumbnailPresent() && !object.builder.build().thumbnail().get().height().isAbsent() ?
+                        String.valueOf(object.builder.build().thumbnail().get().height().get()) : "null");
+            }
             if(object.thumbnailBuilder == null) {
                 object.thumbnailBuilder = EmbedThumbnailData.builder();
             }
@@ -161,6 +244,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("provider_name", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isProviderPresent() && !object.builder.build().provider().get().name().isAbsent() ?
+                        object.builder.build().provider().get().name().get() : "null");
+            }
             if(object.providerBuilder == null) {
                 object.providerBuilder = EmbedProviderData.builder();
             }
@@ -168,6 +255,10 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("provider_url", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isProviderPresent() && !object.builder.build().provider().get().url().isAbsent() ?
+                        object.builder.build().provider().get().url().get().get() : "null");
+            }
             if(object.providerBuilder == null) {
                 object.providerBuilder = EmbedProviderData.builder();
             }
@@ -175,22 +266,42 @@ public class DiscordEmbedTag implements ObjectTag {
             return object;
         });
         registerTag("title", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isTitlePresent() ?
+                        object.builder.build().title().get() : "null");
+            }
             object.builder.title(attribute.getContext(1));
             return object;
         });
         registerTag("description", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isDescriptionPresent() ?
+                        object.builder.build().description().get() : "null");
+            }
             object.builder.description(attribute.getContext(1));
             return object;
         });
         registerTag("type", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isTypePresent() ?
+                        object.builder.build().type().get() : "null");
+            }
             object.builder.type(attribute.getContext(1));
             return object;
         });
         registerTag("color", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isColorPresent() ?
+                        String.valueOf(object.builder.build().color().get()) : "null");
+            }
             object.builder.color(Integer.valueOf(attribute.getContext(1)));
             return object;
         });
         registerTag("url", (attribute, object) -> {
+            if(!attribute.hasContext(1)) {
+                return new ElementTag(object.builder.build().isUrlPresent() ?
+                        object.builder.build().url().get() : "null");
+            }
             object.builder.url(attribute.getContext(1));
             return object;
         });
@@ -259,13 +370,11 @@ public class DiscordEmbedTag implements ObjectTag {
     }
 
     public static String escape(String input) {
-        input = CoreUtilities.replace(EscapeTagBase.escape(input), ",", "&com");
-        return input;
+        return CoreUtilities.replace(EscapeTagBase.escape(input), ",", "&com");
     }
 
     public static String unEscape(String input) {
-        input = CoreUtilities.replace(EscapeTagBase.unEscape(input), "&com", ",");
-        return input;
+        return CoreUtilities.replace(EscapeTagBase.unEscape(input), "&com", ",");
     }
 
     @Override

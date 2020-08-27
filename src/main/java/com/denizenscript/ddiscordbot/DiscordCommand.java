@@ -356,7 +356,7 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
                             try {
                                 Field f = e.getClass().getDeclaredField("requestBuilder");
                                 f.setAccessible(true);
-                                f.set(e, embed.builder);
+                                f.set(e, embed.build());
                             } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
                                 noSuchFieldException.printStackTrace();
                             }

@@ -9,6 +9,7 @@ import com.denizenscript.denizencore.objects.core.MapTag;
 import com.denizenscript.denizencore.tags.*;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
@@ -16,7 +17,10 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.discordjson.json.EmbedData;
+import org.bukkit.Bukkit;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -136,6 +140,28 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
                 id = String.valueOf(object.message_id);
             }
             return new ElementTag(id);
+        });
+
+        // <--[tag]
+        // @attribute <DiscordMessageTag.embeds>
+        // @returns ListTag(DiscordEmbedTag)
+        // @plugin dDiscordBot
+        // @description
+        // Returns the contents of the message.
+        // -->
+        registerTag("embeds", (attribute, object) -> {
+            ListTag list = new ListTag();
+            for (Embed embed : object.message.getEmbeds()) {
+                try {
+                    Field f = embed.getClass().getDeclaredField("data");
+                    f.setAccessible(true);
+                    EmbedData data = (EmbedData)f.get(embed);
+                    list.addObject(new DiscordEmbedTag(data));
+                } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
+                    noSuchFieldException.printStackTrace();
+                }
+            }
+            return CoreUtilities.autoAttrib(list, attribute.fulfill(1));
         });
 
         // <--[tag]
@@ -375,43 +401,49 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
 
     @Override
     public void adjust(Mechanism mechanism) {
-        // <--[mechanism]
-        // @object DiscordMessageTag
-        // @name add_reaction
-        // @input DiscordEmojiTag
-        // @description
-        // Forces the bot to add a reaction to a message
-        // @tags
-        // <DiscordMessageTag.reactions>
-        // -->
-        if (mechanism.matches("add_reaction")) {
-            message.addReaction(DiscordEmojiTag.valueOf(mechanism.getValue().asString(), null).emoji).block();
-        }
-        // <--[mechanism]
-        // @object DiscordMessageTag
-        // @name remove_reaction
-        // @input DiscordEmojiTag
-        // @description
-        // Forces the bot to remove a reaction from a message
-        // @tags
-        // <DiscordMessageTag.reactions>
-        // -->
-        if (mechanism.matches("remove_reaction")) {
-            User connection = DenizenDiscordBot.instance.connections.get(bot).client.getSelf().block();
-            message.removeReaction(DiscordEmojiTag.valueOf(mechanism.getValue().asString(), null).emoji, connection.getId()).block();
-        }
-        // <--[mechanism]
-        // @object DiscordMessageTag
-        // @name clear_reactions
-        // @input none
-        // @description
-        // Removes all reactions from a message
-        // @tags
-        // <DiscordMessageTag.reactions>
-        // -->
-        if (mechanism.matches("clear_reactions")) {
-            message.removeAllReactions().block();
-        }
+        // using runnables to prevent mech server lag
+        Bukkit.getScheduler().runTask(DenizenDiscordBot.instance, new Runnable() {
+            @Override
+            public void run() {
+                // <--[mechanism]
+                // @object DiscordMessageTag
+                // @name add_reaction
+                // @input DiscordEmojiTag
+                // @description
+                // Forces the bot to add a reaction to a message
+                // @tags
+                // <DiscordMessageTag.reactions>
+                // -->
+                if (mechanism.matches("add_reaction")) {
+                    message.addReaction(DiscordEmojiTag.valueOf(mechanism.getValue().asString(), null).emoji).block();
+                }
+                // <--[mechanism]
+                // @object DiscordMessageTag
+                // @name remove_reaction
+                // @input DiscordEmojiTag
+                // @description
+                // Forces the bot to remove a reaction from a message
+                // @tags
+                // <DiscordMessageTag.reactions>
+                // -->
+                if (mechanism.matches("remove_reaction")) {
+                    User connection = DenizenDiscordBot.instance.connections.get(bot).client.getSelf().block();
+                    message.removeReaction(DiscordEmojiTag.valueOf(mechanism.getValue().asString(), null).emoji, connection.getId()).block();
+                }
+                // <--[mechanism]
+                // @object DiscordMessageTag
+                // @name clear_reactions
+                // @input none
+                // @description
+                // Removes all reactions from a message
+                // @tags
+                // <DiscordMessageTag.reactions>
+                // -->
+                if (mechanism.matches("clear_reactions")) {
+                    message.removeAllReactions().block();
+                }
+            }
+        });
     }
 
     @Override
