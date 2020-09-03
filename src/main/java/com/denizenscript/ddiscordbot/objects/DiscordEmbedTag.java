@@ -1,5 +1,6 @@
 package com.denizenscript.ddiscordbot.objects;
 
+import com.denizenscript.ddiscordbot.scripts.DiscordEmbedScriptContainer;
 import com.denizenscript.denizencore.objects.ArgumentHelper;
 import com.denizenscript.denizencore.objects.Fetchable;
 import com.denizenscript.denizencore.objects.ObjectTag;
@@ -73,22 +74,38 @@ public class DiscordEmbedTag implements ObjectTag {
         return b;
     }
 
-    public DiscordEmbedTag() {
-        builder = ImmutableEmbedData.builder();
-    }
+    public DiscordEmbedTag() { this.builder = ImmutableEmbedData.builder(); }
+
+    public DiscordEmbedTag(ImmutableEmbedData.Builder builder) { this.builder = builder; }
 
     public DiscordEmbedTag(EmbedData data) {
-        builder = ImmutableEmbedData.builder().from(data);
+        this.builder = ImmutableEmbedData.builder().from(data);
     }
 
     public static void registerTags() {
-        TagManager.registerTagHandler(new TagRunnable.RootForm() {
-            public void run(ReplaceableTagEvent event) {
-                if (event.matches("discordembed") && !event.replaced()) {
-                    event.setReplacedObject(CoreUtilities.autoAttrib(new DiscordEmbedTag(), event.getAttributes().fulfill(1)));
+//        TagManager.registerTagHandler(new TagRunnable.RootForm() {
+//            public void run(ReplaceableTagEvent event) {
+//                if (event.matches("discordembed") && !event.replaced()) {
+//                    if(event.hasNameContext()) {
+//                        if(DiscordEmbedScriptContainer.containers.containsKey(event.getNameContext())) {
+//                            event.setReplacedObject(CoreUtilities.autoAttrib(new DiscordEmbedTag(DiscordEmbedScriptContainer.containers.get(event.getNameContext()).build()), event.getAttributes().fulfill(1)));
+//                        }
+//                    } else {
+//                        event.setReplacedObject(CoreUtilities.autoAttrib(new DiscordEmbedTag(), event.getAttributes().fulfill(1)));
+//                    }
+//                }
+//            }
+//        }, "discordembed");
+        TagManager.registerTagHandler("discordembed", (attribute) -> {
+            if (!attribute.hasContext(1)) {
+                return new DiscordEmbedTag();
+            } else {
+                if(DiscordEmbedScriptContainer.containers.containsKey(attribute.getContext(1))) {
+                    return new DiscordEmbedTag(DiscordEmbedScriptContainer.containers.get(attribute.getContext(1)).build());
                 }
             }
-        }, "discordembed");
+            return null;
+        });
         registerTag("author_name", (attribute, object) -> {
             if(!attribute.hasContext(1)) {
                 return new ElementTag(object.builder.build().isAuthorPresent() && !object.builder.build().author().get().name().isAbsent() ?

@@ -2,7 +2,11 @@ package com.denizenscript.ddiscordbot;
 
 import com.denizenscript.ddiscordbot.events.*;
 import com.denizenscript.ddiscordbot.objects.*;
+import com.denizenscript.ddiscordbot.scripts.DiscordEmbedScriptContainer;
+import com.denizenscript.denizen.events.bukkit.ScriptReloadEvent;
 import com.denizenscript.denizencore.objects.core.ListTag;
+import com.denizenscript.denizencore.scripts.ScriptRegistry;
+import com.denizenscript.denizencore.scripts.containers.ScriptContainer;
 import com.denizenscript.denizencore.utilities.debugging.Debug;
 import com.denizenscript.denizencore.DenizenCore;
 import com.denizenscript.denizencore.events.ScriptEvent;
@@ -14,11 +18,15 @@ import com.denizenscript.denizencore.tags.ReplaceableTagEvent;
 import com.denizenscript.denizencore.tags.TagManager;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
 import com.denizenscript.denizencore.utilities.debugging.SlowWarning;
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
+import java.util.Map;
 
-public class DenizenDiscordBot extends JavaPlugin {
+public class DenizenDiscordBot extends JavaPlugin implements Listener {
 
     public static SlowWarning userContextDeprecation = new SlowWarning("'user_id', 'author_name', and similar contexts are deprecated: use 'context.user.id' and similar.");
 
@@ -51,6 +59,8 @@ public class DenizenDiscordBot extends JavaPlugin {
             ObjectFetcher.registerWithObjectFetcher(DiscordMessageTag.class, DiscordMessageTag.tagProcessor);
             ObjectFetcher.registerWithObjectFetcher(DiscordEmojiTag.class, DiscordEmojiTag.tagProcessor);
             ObjectFetcher.registerWithObjectFetcher(DiscordEmbedTag.class, DiscordEmbedTag.tagProcessor);
+            ScriptRegistry._registerType("discord_embed", DiscordEmbedScriptContainer.class);
+            Bukkit.getPluginManager().registerEvents(this, this);
             TagManager.registerTagHandler(new TagRunnable.RootForm() {
                 @Override
                 public void run(ReplaceableTagEvent event) {
@@ -77,6 +87,15 @@ public class DenizenDiscordBot extends JavaPlugin {
         }
         catch (Throwable ex) {
             Debug.echoError(ex);
+        }
+    }
+
+    @EventHandler
+    public void scriptReload(ScriptReloadEvent event) {
+        for (Map.Entry<String, ScriptContainer> entry : ScriptRegistry.scriptContainers.entrySet()) {
+            if(entry.getValue().getContainerType().equalsIgnoreCase("discord_embed")) {
+                DiscordEmbedScriptContainer.containers.put(entry.getKey(), (DiscordEmbedScriptContainer) entry.getValue());
+            }
         }
     }
 
