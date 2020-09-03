@@ -58,6 +58,7 @@ public class DiscordUserTag implements ObjectTag, Adjustable {
         if (usrId == 0) {
             return null;
         }
+
         return new DiscordUserTag(bot, usrId);
     }
 
@@ -133,7 +134,6 @@ public class DiscordUserTag implements ObjectTag, Adjustable {
                 }
             }
         }, "discorduser");
-
         // <--[tag]
         // @attribute <DiscordUserTag.name>
         // @returns ElementTag
@@ -144,6 +144,29 @@ public class DiscordUserTag implements ObjectTag, Adjustable {
         registerTag("name", (attribute, object) -> {
             return new ElementTag(object.cached != null ? object.cached.username : object.getUser().getUsername());
         });
+
+        // <--[tag]
+        // @attribute <DiscordUserTag.avatar_url>
+        // @returns ElementTag(Boolean)
+        // @plugin dDiscordBot
+        // @description
+        // Returns the URL for the avatar for the user.
+        // -->
+        registerTag("avatar_url", (attribute, object) -> {
+            return new ElementTag(object.getUser().getAvatarUrl());
+        });
+
+        // <--[tag]
+        // @attribute <DiscordUserTag.discriminator>
+        // @returns ElementTag(Boolean)
+        // @plugin dDiscordBot
+        // @description
+        // Returns the user's 4-digit discriminator
+        // -->
+        registerTag("discriminator", (attribute, object) -> {
+            return new ElementTag(object.getUser().getDiscriminator());
+        });
+
         // <--[tag]
         // @attribute <DiscordUserTag.is_bot>
         // @returns ElementTag(Boolean)

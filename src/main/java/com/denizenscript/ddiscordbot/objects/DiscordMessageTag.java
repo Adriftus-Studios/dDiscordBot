@@ -109,7 +109,6 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
     public long message_id;
 
     public static void registerTags() {
-
         TagManager.registerTagHandler(new TagRunnable.RootForm() {
             public void run(ReplaceableTagEvent event) {
                 if (event.matches("discordmessage") && !event.replaced()) {
@@ -151,15 +150,15 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
         // -->
         registerTag("embeds", (attribute, object) -> {
             ListTag list = new ListTag();
-            for (Embed embed : object.message.getEmbeds()) {
-                try {
-                    Field f = embed.getClass().getDeclaredField("data");
-                    f.setAccessible(true);
+            try {
+                Field f = Embed.class.getDeclaredField("data");
+                f.setAccessible(true);
+                for (Embed embed : object.message.getEmbeds()) {
                     EmbedData data = (EmbedData)f.get(embed);
                     list.addObject(new DiscordEmbedTag(data));
-                } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
-                    noSuchFieldException.printStackTrace();
                 }
+            } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
+                noSuchFieldException.printStackTrace();
             }
             return CoreUtilities.autoAttrib(list, attribute.fulfill(1));
         });
@@ -179,6 +178,28 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
                 contents = String.valueOf(object.message.getContent());
             }
             return new ElementTag(contents);
+        });
+
+        // <--[tag]
+        // @attribute <DiscordMessageTag.is_tts>
+        // @returns DiscordUserTag
+        // @plugin dDiscordBot
+        // @description
+        // Returns whether or not the message is text-to-speech.
+        // -->
+        registerTag("is_tts", (attribute, object) -> {
+            return new ElementTag(object.message.isTts());
+        });
+
+        // <--[tag]
+        // @attribute <DiscordMessageTag.is_pinned>
+        // @returns DiscordUserTag
+        // @plugin dDiscordBot
+        // @description
+        // Returns whether or not the message is pinned.
+        // -->
+        registerTag("is_pinned", (attribute, object) -> {
+            return new ElementTag(object.message.isPinned());
         });
 
         // <--[tag]
@@ -441,6 +462,21 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
                 // -->
                 if (mechanism.matches("clear_reactions")) {
                     message.removeAllReactions().block();
+                }
+                // <--[mechanism]
+                // @object DiscordMessageTag
+                // @name message
+                // @input ElementTag
+                // @description
+                // Changes the contents of the message
+                // @tags
+                // <DiscordMessageTag.message>
+                // -->
+                if (mechanism.matches("message")) {
+                    User connection = DenizenDiscordBot.instance.connections.get(bot).client.getSelf().block();
+                    message.edit(c -> {
+                        c.setContent(mechanism.getValue().asString());
+                    }).block();
                 }
             }
         });
