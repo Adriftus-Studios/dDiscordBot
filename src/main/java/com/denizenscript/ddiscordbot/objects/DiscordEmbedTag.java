@@ -298,7 +298,7 @@ public class DiscordEmbedTag implements ObjectTag {
             object.builder.description(attribute.getContext(1));
             return object;
         });
-        registerTag("type", (attribute, object) -> {
+        registerTag("embed_type", (attribute, object) -> {
             if(!attribute.hasContext(1)) {
                 return new ElementTag(object.builder.build().isTypePresent() ?
                         object.builder.build().type().get() : "null");
@@ -379,7 +379,7 @@ public class DiscordEmbedTag implements ObjectTag {
         if (builder.build().isProviderPresent() && !builder.build().provider().get().url().isAbsent()) { fields.add("provider_url=" + escape(builder.build().provider().get().url().get().get())); }
         if (builder.build().isTitlePresent()) { fields.add("title=" + escape(builder.build().title().get())); }
         if (builder.build().isDescriptionPresent()) { fields.add("description=" + escape(builder.build().description().get())); }
-        if (builder.build().isTypePresent()) { fields.add("type=" + escape(builder.build().type().get())); }
+        if (builder.build().isTypePresent()) { fields.add("embed_type=" + escape(builder.build().type().get())); }
         if (builder.build().isColorPresent()) { fields.add("color=" + builder.build().color().get()); }
         if (builder.build().isUrlPresent()) { fields.add("url=" + escape(builder.build().url().get())); }
         id = id + String.join(";", fields);

@@ -167,6 +167,7 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
         // @attribute <DiscordMessageTag.message>
         // @returns ElementTag
         // @plugin dDiscordBot
+        // @mechanism DiscordMessageTag.message
         // @description
         // Returns the contents of the message.
         // -->

@@ -90,15 +90,6 @@ public class DenizenDiscordBot extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler
-    public void scriptReload(ScriptReloadEvent event) {
-        for (Map.Entry<String, ScriptContainer> entry : ScriptRegistry.scriptContainers.entrySet()) {
-            if(entry.getValue().getContainerType().equalsIgnoreCase("discord_embed")) {
-                DiscordEmbedScriptContainer.containers.put(entry.getKey(), (DiscordEmbedScriptContainer) entry.getValue());
-            }
-        }
-    }
-
     public void discordTagBase(ReplaceableTagEvent event) {
         if (!event.matches("discord") || event.replaced()) {
             return;
