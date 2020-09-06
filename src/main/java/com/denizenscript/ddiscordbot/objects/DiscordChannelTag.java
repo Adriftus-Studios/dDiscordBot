@@ -5,6 +5,7 @@ import com.denizenscript.ddiscordbot.DenizenDiscordBot;
 import com.denizenscript.denizen.utilities.debugging.Debug;
 import com.denizenscript.denizencore.objects.*;
 import com.denizenscript.denizencore.objects.core.ElementTag;
+import com.denizenscript.denizencore.objects.core.ListTag;
 import com.denizenscript.denizencore.tags.*;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.*;
@@ -294,6 +295,41 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // -->
         registerTag("user_limit", (attribute, object) -> {
             return new ElementTag(object.getChannel().getRestChannel().getData().block().userLimit().get());
+        });
+
+        // <--[tag]
+        // @attribute <DiscordChannelTag.is_private>
+        // @returns ElementTag(Number)
+        // @plugin dDiscordBot
+        // @description
+        // Returns whether or not the channel is private (direct message).
+        // -->
+        registerTag("is_private", (attribute, object) -> {
+            return new ElementTag(object.channel instanceof PrivateChannel);
+        });
+
+        registerTag("private", (attribute, object) -> {
+            attribute = attribute.fulfill(1);
+
+            if (!(object.channel instanceof PrivateChannel)) {
+                return null;
+            }
+            PrivateChannel c = (PrivateChannel) object.channel;
+            // <--[tag]
+            // @attribute <DiscordChannelTag.private.users>
+            // @returns DiscordUserTag
+            // @plugin dDiscordBot
+            // @description
+            // Returns a list of all users in the private channel.
+            // -->
+            if (attribute.startsWith("users")) {
+                ListTag users = new ListTag();
+                for (User u : c.getRecipients().collectList().block()) {
+                    users.addObject(new DiscordUserTag(object.bot, u));
+                }
+                return users;
+            }
+            return null;
         });
 
     }

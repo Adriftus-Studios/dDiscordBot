@@ -64,18 +64,14 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
 
     public DiscordMessageTag(String bot, long channelId, long messageId) {
         this.bot = bot;
-        this.channel = getBot().client.getChannelById(Snowflake.of(channelId)).block();
         this.message = getBot().client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block();
-        this.channel_id = channelId;
-        this.message_id = messageId;
+        this.channel = message.getChannel().block();
     }
 
     public DiscordMessageTag(String bot, Message message) {
         this.bot = bot;
         this.message = message;
         this.channel = message.getChannel().block();
-        this.message_id = message.getId().asLong();
-        this.channel_id = channel.getId().asLong();
     }
 
     public DiscordConnection getBot() {
@@ -83,18 +79,10 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
     }
 
     public Channel getChannel() {
-        if (channel != null) {
-            return channel;
-        }
-        channel = getBot().client.getChannelById(Snowflake.of(channel_id)).block();
         return channel;
     }
 
     public Message getMessage() {
-        if (message != null) {
-            return message;
-        }
-        message = getBot().client.getMessageById(Snowflake.of(channel_id), Snowflake.of(message_id)).block();
         return message;
     }
 
@@ -103,10 +91,6 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
     public Message message;
 
     public String bot;
-
-    public long channel_id;
-
-    public long message_id;
 
     public static void registerTags() {
         TagManager.registerTagHandler(new TagRunnable.RootForm() {
@@ -132,13 +116,18 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
         // Returns the ID of the message.
         // -->
         registerTag("id", (attribute, object) -> {
-            String id;
-            if (object.message != null) {
-                id = object.message.getId().asString();
-            } else {
-                id = String.valueOf(object.message_id);
-            }
-            return new ElementTag(id);
+            return new ElementTag(object.message.getId().asString());
+        });
+
+        // <--[tag]
+        // @attribute <DiscordMessageTag.reference>
+        // @returns ElementTag
+        // @plugin dDiscordBot
+        // @description
+        // Returns the message's URL
+        // -->
+        registerTag("reference", (attribute, object) -> {
+            return new ElementTag("https://discordapp.com/channels/" + object.message.getGuild().block().getId().asString() + "/" + object.message.getChannel().block().getId().asString() + "/" + object.message.getId().asString());
         });
 
         // <--[tag]
@@ -398,9 +387,9 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
     @Override
     public String identify() {
         if (bot != null) {
-            return "discordmessage@" + bot + "," + channel_id + "," + message_id;
+            return "discordmessage@" + bot + "," + channel.getId().asString() + "," + message.getId().asString();
         }
-        return "discordmessage@" + channel_id + "," + message_id;
+        return "discordmessage@" + channel.getId().asString() + "," + message.getId().asString();
     }
 
     @Override

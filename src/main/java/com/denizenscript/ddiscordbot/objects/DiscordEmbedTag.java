@@ -86,7 +86,7 @@ public class DiscordEmbedTag implements ObjectTag {
 //        TagManager.registerTagHandler(new TagRunnable.RootForm() {
 //            public void run(ReplaceableTagEvent event) {
 //                if (event.matches("discordembed") && !event.replaced()) {
-//                    if(event.hasNameContext()) {
+//                    if(event.getAttributes().hasContext(1)) {
 //                        if(DiscordEmbedScriptContainer.containers.containsKey(event.getNameContext())) {
 //                            event.setReplacedObject(CoreUtilities.autoAttrib(new DiscordEmbedTag(DiscordEmbedScriptContainer.containers.get(event.getNameContext()).build()), event.getAttributes().fulfill(1)));
 //                        }
@@ -98,10 +98,10 @@ public class DiscordEmbedTag implements ObjectTag {
 //        }, "discordembed");
         TagManager.registerTagHandler("discordembed", (attribute) -> {
             if (!attribute.hasContext(1)) {
-                return new DiscordEmbedTag();
+                return CoreUtilities.autoAttrib(new DiscordEmbedTag(), attribute.fulfill(1));
             } else {
                 if(DiscordEmbedScriptContainer.containers.containsKey(attribute.getContext(1))) {
-                    return new DiscordEmbedTag(DiscordEmbedScriptContainer.containers.get(attribute.getContext(1)).build());
+                    return CoreUtilities.autoAttrib(new DiscordEmbedTag(DiscordEmbedScriptContainer.containers.get(attribute.getContext(1)).build()), attribute.fulfill(1));
                 }
             }
             return null;
