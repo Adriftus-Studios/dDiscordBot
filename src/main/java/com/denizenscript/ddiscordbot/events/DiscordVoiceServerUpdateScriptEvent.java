@@ -23,7 +23,7 @@ public class DiscordVoiceServerUpdateScriptEvent extends DiscordScriptEvent {
     // @Context
     // <context.group> returns the DiscordGroupTag
     // <context.endpoint> returns the server's endpoint
-    // <context.token> returns the server's token
+    // <context.token> returns the user's auth token
     // -->
 
     public VoiceServerUpdateEvent getEvent() {
@@ -56,6 +56,6 @@ public class DiscordVoiceServerUpdateScriptEvent extends DiscordScriptEvent {
 
     @Override
     public String getName() {
-        return "DiscordVoiceStateUpdates";
+        return "DiscordVoiceServerUpdates";
     }
 }

@@ -7,6 +7,7 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
@@ -130,6 +131,10 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
     // @Usage
     // Use to send embedded messages.
     // - ~discord id:mybot send_embed channel:<[channel]> embed:<discordembed.title[test].description[something]>
+    //
+    // @Usage
+    // Use to send embedded messages to a user.
+    // - ~discord id:mybot send_embed user:<[user]> embed:<discordembed.title[test].description[something]>
     //
     // -->
 
@@ -351,18 +356,33 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
                         return;
                     }
                     if (embed != null) {
-                        TextChannel c = (TextChannel) client.getChannelById(Snowflake.of(channel.channel_id)).block();
-                        Message m = c.createEmbed(e -> {
-                            try {
-                                Field f = e.getClass().getDeclaredField("requestBuilder");
-                                f.setAccessible(true);
-                                f.set(e, embed.build());
-                            } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
-                                noSuchFieldException.printStackTrace();
-                            }
-                        }).block();
-                        scriptEntry.addObject("message_id", new ElementTag(m.getId().asString()));
-                        scriptEntry.setFinished(true);
+                        if (channel == null) {
+                            PrivateChannel c = user.getUser().getPrivateChannel().block();
+                            Message m = c.createEmbed(e -> {
+                                try {
+                                    Field f = e.getClass().getDeclaredField("requestBuilder");
+                                    f.setAccessible(true);
+                                    f.set(e, embed.build());
+                                } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
+                                    noSuchFieldException.printStackTrace();
+                                }
+                            }).block();
+                            scriptEntry.addObject("message_id", new ElementTag(m.getId().asString()));
+                            scriptEntry.setFinished(true);
+                        } else {
+                            TextChannel c = (TextChannel) client.getChannelById(Snowflake.of(channel.channel_id)).block();
+                            Message m = c.createEmbed(e -> {
+                                try {
+                                    Field f = e.getClass().getDeclaredField("requestBuilder");
+                                    f.setAccessible(true);
+                                    f.set(e, embed.build());
+                                } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
+                                    noSuchFieldException.printStackTrace();
+                                }
+                            }).block();
+                            scriptEntry.addObject("message_id", new ElementTag(m.getId().asString()));
+                            scriptEntry.setFinished(true);
+                        }
                     }
                     break;
                 }
