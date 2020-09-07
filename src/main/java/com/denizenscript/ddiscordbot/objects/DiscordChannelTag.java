@@ -13,6 +13,7 @@ import com.denizenscript.denizencore.utilities.CoreUtilities;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.discordjson.json.ChannelModifyRequest;
 import org.bukkit.Bukkit;
 
