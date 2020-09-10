@@ -178,7 +178,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
             }
             return new ElementTag(object.getChannel().getType().name());
 
-        }, "type");
+        });
 
         // <--[tag]
         // @attribute <DiscordChannelTag.id>
@@ -247,7 +247,11 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // Returns the topic of the channel.
         // -->
         registerTag("topic", (attribute, object) -> {
-            return new ElementTag(object.getChannel().getRestChannel().getData().block().topic().get().get());
+            if(object.getChannel().getRestChannel().getData().block().topic().isAbsent()) {
+                return null;
+            } else {
+                return new ElementTag(object.getChannel().getRestChannel().getData().block().topic().get().get());
+            }
         });
 
         // <--[tag]
