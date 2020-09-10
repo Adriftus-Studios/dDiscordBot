@@ -5,13 +5,16 @@ import com.denizenscript.denizencore.objects.ArgumentHelper;
 import com.denizenscript.denizencore.objects.Fetchable;
 import com.denizenscript.denizencore.objects.ObjectTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
+import com.denizenscript.denizencore.objects.core.MapTag;
 import com.denizenscript.denizencore.tags.*;
 import com.denizenscript.denizencore.tags.core.EscapeTagBase;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
+import com.denizenscript.denizencore.utilities.text.StringHolder;
 import discord4j.discordjson.json.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DiscordEmbedTag implements ObjectTag {
 
@@ -42,7 +45,7 @@ public class DiscordEmbedTag implements ObjectTag {
         }
         return ArgumentHelper.matchesInteger(arg.substring(comma + 1));
     }
-
+    public List<EmbedFieldData> fields = new ArrayList<EmbedFieldData>();
     public ImmutableEmbedData.Builder builder;
     public ImmutableEmbedAuthorData.Builder authorBuilder;
     public ImmutableEmbedFooterData.Builder footerBuilder;
@@ -322,6 +325,42 @@ public class DiscordEmbedTag implements ObjectTag {
             object.builder.url(attribute.getContext(1));
             return object;
         });
+        registerTag("fields", (attribute, object) -> {
+            if(!attribute.hasContext(1) && object.fields != null) {
+                MapTag map = new MapTag();
+                for(EmbedFieldData s : object.fields) {
+                    if(s.inline().get() && !s.name().isEmpty() && s.value() != null) {
+                        map.putObject(s.name(), new ElementTag(s.value()));
+                    }
+                }
+                return map;
+            }
+            MapTag map = MapTag.valueOf(attribute.getContext(1), null);
+            for(Map.Entry<StringHolder, ObjectTag> e : map.map.entrySet()) {
+                if (!e.getKey().toString().isEmpty() && !e.getValue().asType(ElementTag.class, null).asString().isEmpty()) {
+                    object.fields.add(EmbedFieldData.builder().name(e.getKey().toString()).value(e.getValue().asType(ElementTag.class, null).asString()).inline(false).build());
+                }
+            }
+            return object;
+        });
+        registerTag("inline_fields", (attribute, object) -> {
+            if(!attribute.hasContext(1) && object.fields != null) {
+                MapTag map = new MapTag();
+                for(EmbedFieldData s : object.fields) {
+                    if(s.inline().get() && !s.name().isEmpty() && s.value() != null) {
+                        map.putObject(s.name(), new ElementTag(s.value()));
+                    }
+                }
+                return map;
+            }
+            MapTag map = MapTag.valueOf(attribute.getContext(1), null);
+            for(Map.Entry<StringHolder, ObjectTag> e : map.map.entrySet()) {
+                if (!e.getKey().toString().isEmpty() && !e.getValue().asType(ElementTag.class, null).asString().isEmpty()) {
+                    object.fields.add(EmbedFieldData.builder().name(e.getKey().toString()).value(e.getValue().asType(ElementTag.class, null).asString()).inline(true).build());
+                }
+            }
+            return object;
+        });
     }
 
     public static ObjectTagProcessor<DiscordEmbedTag> tagProcessor = new ObjectTagProcessor<>();
@@ -382,6 +421,13 @@ public class DiscordEmbedTag implements ObjectTag {
         if (builder.build().isTypePresent()) { fields.add("embed_type=" + escape(builder.build().type().get())); }
         if (builder.build().isColorPresent()) { fields.add("color=" + builder.build().color().get()); }
         if (builder.build().isUrlPresent()) { fields.add("url=" + escape(builder.build().url().get())); }
+        if (builder.build().isFieldsPresent()) {
+            MapTag map = new MapTag();
+            for(EmbedFieldData s : builder.build().fields().get()) {
+                map.putObject(s.name(), new ElementTag(s.value()));
+            }
+            fields.add("fields=" + escape(map.identify()));
+        }
         id = id + String.join(";", fields);
         return id;
     }

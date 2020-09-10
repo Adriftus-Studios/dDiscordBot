@@ -20,6 +20,8 @@ import com.denizenscript.denizencore.scripts.commands.Holdable;
 import com.denizenscript.denizencore.scripts.queues.ScriptQueue;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
 import discord4j.discordjson.json.ActivityUpdateRequest;
+import discord4j.discordjson.json.EmbedFieldData;
+import discord4j.discordjson.json.ImmutableEmbedData;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.common.util.Snowflake;
 import discord4j.store.jdk.JdkStoreService;
@@ -363,11 +365,15 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
                                     Field f = e.getClass().getDeclaredField("requestBuilder");
                                     f.setAccessible(true);
                                     f.set(e, embed.build());
+                                    for(EmbedFieldData field : embed.fields) {
+                                        e.addField(field.name(), field.value(), field.inline().get());
+                                    }
                                 } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
                                     noSuchFieldException.printStackTrace();
                                 }
                             }).block();
                             scriptEntry.addObject("message_id", new ElementTag(m.getId().asString()));
+                            scriptEntry.addObject("message", new DiscordMessageTag(id.asString(), m));
                             scriptEntry.setFinished(true);
                         } else {
                             TextChannel c = (TextChannel) client.getChannelById(Snowflake.of(channel.channel_id)).block();
@@ -376,11 +382,15 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
                                     Field f = e.getClass().getDeclaredField("requestBuilder");
                                     f.setAccessible(true);
                                     f.set(e, embed.build());
+                                    for(EmbedFieldData field : embed.fields) {
+                                        e.addField(field.name(), field.value(), field.inline().get());
+                                    }
                                 } catch (NoSuchFieldException | IllegalAccessException noSuchFieldException) {
                                     noSuchFieldException.printStackTrace();
                                 }
                             }).block();
                             scriptEntry.addObject("message_id", new ElementTag(m.getId().asString()));
+                            scriptEntry.addObject("message", new DiscordMessageTag(id.asString(), m));
                             scriptEntry.setFinished(true);
                         }
                     }
@@ -406,6 +416,7 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
                                 chan -> chan.createMessage(message.asString())))
                                 .map(m -> {
                                     scriptEntry.addObject("message_id", new ElementTag(m.getId().asString()));
+                                    scriptEntry.addObject("message", new DiscordMessageTag(id.asString(), m));
                                     scriptEntry.setFinished(true);
                                     return m;
                                 })
@@ -418,6 +429,7 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
                                     .map(m -> {
 
                                         scriptEntry.addObject("message_id", new ElementTag(m.getId().asString()));
+                                        scriptEntry.addObject("message", new DiscordMessageTag(id.asString(), m));
                                         scriptEntry.setFinished(true);
                                         return m;
                                     })
