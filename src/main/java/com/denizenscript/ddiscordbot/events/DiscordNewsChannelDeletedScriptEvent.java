@@ -3,7 +3,6 @@ package com.denizenscript.ddiscordbot.events;
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.ddiscordbot.objects.DiscordChannelTag;
 import com.denizenscript.denizencore.objects.ObjectTag;
-import discord4j.core.event.domain.channel.NewsChannelCreateEvent;
 import discord4j.core.event.domain.channel.NewsChannelDeleteEvent;
 
 public class DiscordNewsChannelDeletedScriptEvent extends DiscordScriptEvent {
