@@ -150,8 +150,9 @@ public class DiscordEmojiTag implements ObjectTag {
         // Only works for custom emojis.
         // -->
         registerTag("icon_url", (attribute, object) -> {
-            if (object.emoji.asCustomEmoji().isPresent()) {
-                return new ElementTag("https://cdn.discordapp.com/emojis/" + object.emoji_id + ".png?v=1");
+            String id = object.getId();
+            if (!id.equalsIgnoreCase("INVALID")) {
+                return new ElementTag("https://cdn.discordapp.com/emojis/" + id + ".png?v=1");
             }
             return null;
         });
