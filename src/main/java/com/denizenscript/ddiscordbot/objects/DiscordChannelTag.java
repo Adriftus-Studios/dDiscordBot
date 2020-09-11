@@ -10,10 +10,7 @@ import com.denizenscript.denizencore.tags.*;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.*;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
-import discord4j.core.object.entity.channel.Channel;
-import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.core.object.entity.channel.PrivateChannel;
-import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.core.object.entity.channel.*;
 import discord4j.discordjson.json.ChannelModifyRequest;
 import org.bukkit.Bukkit;
 
@@ -235,7 +232,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // Returns the position of the channel.
         // -->
         registerTag("position", (attribute, object) -> {
-            return new ElementTag(object.getChannel().getRestChannel().getData().block().position().get());
+            return new ElementTag(((GuildChannel) object.getChannel()).getPosition().toString());
         });
 
         // <--[tag]
@@ -247,11 +244,14 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // Returns the topic of the channel.
         // -->
         registerTag("topic", (attribute, object) -> {
-            if(object.getChannel().getRestChannel().getData().block().topic().isAbsent()) {
-                return null;
-            } else {
-                return new ElementTag(object.getChannel().getRestChannel().getData().block().topic().get().get());
+            if (object.getChannel().getType() == Channel.Type.GUILD_TEXT) {
+                TextChannel channel = (TextChannel) object.getChannel();
+                if (channel.getTopic().isPresent()) {
+                    return new ElementTag(channel.getTopic().get());
+                }
+                return new ElementTag("");
             }
+            return null;
         });
 
         // <--[tag]
