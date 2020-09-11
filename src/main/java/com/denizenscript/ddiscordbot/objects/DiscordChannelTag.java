@@ -14,6 +14,8 @@ import discord4j.core.object.entity.channel.*;
 import discord4j.discordjson.json.ChannelModifyRequest;
 import org.bukkit.Bukkit;
 
+import java.util.function.Consumer;
+
 public class DiscordChannelTag implements ObjectTag, Adjustable {
 
     // <--[language]
@@ -263,7 +265,14 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // Returns whether or not the channel is marked NSFW.
         // -->
         registerTag("nsfw", (attribute, object) -> {
-            return new ElementTag(object.getChannel().getRestChannel().getData().block().nsfw().get());
+            if (object.getChannel().getType() == Channel.Type.GUILD_TEXT) {
+                TextChannel channel = (TextChannel) object.getChannel();
+                if (channel.getTopic().isPresent()) {
+                    return new ElementTag(channel.isNsfw());
+                }
+                return new ElementTag("");
+            }
+            return null;
         });
 
         // <--[tag]
@@ -275,7 +284,14 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // Returns the channels rate limit per user.
         // -->
         registerTag("rate_limit_per_user", (attribute, object) -> {
-            return new ElementTag(object.getChannel().getRestChannel().getData().block().rateLimitPerUser().get());
+            if (object.getChannel().getType() == Channel.Type.GUILD_TEXT) {
+                TextChannel channel = (TextChannel) object.getChannel();
+                if (channel.getTopic().isPresent()) {
+                    return new ElementTag(channel.getRateLimitPerUser());
+                }
+                return new ElementTag("");
+            }
+            return null;
         });
 
         // <--[tag]
@@ -287,7 +303,11 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // Returns the channels bitrate.
         // -->
         registerTag("bitrate", (attribute, object) -> {
-            return new ElementTag(object.getChannel().getRestChannel().getData().block().bitrate().get());
+            if (object.getChannel().getType() == Channel.Type.GUILD_VOICE) {
+                VoiceChannel channel = (VoiceChannel) object.getChannel();
+                return new ElementTag(channel.getBitrate());
+            }
+            return null;
         });
 
         // <--[tag]
@@ -299,7 +319,11 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
         // Returns the channels user limit.
         // -->
         registerTag("user_limit", (attribute, object) -> {
-            return new ElementTag(object.getChannel().getRestChannel().getData().block().userLimit().get());
+            if (object.getChannel().getType() == Channel.Type.GUILD_VOICE) {
+                VoiceChannel channel = (VoiceChannel) object.getChannel();
+                return new ElementTag(channel.getUserLimit());
+            }
+            return null;
         });
 
         // <--[tag]
@@ -414,7 +438,15 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
                 // <DiscordChannelTag.name>
                 // -->
                 if (mechanism.matches("name")) {
-                    getChannel().getRestChannel().modify(ChannelModifyRequest.builder().name(mechanism.getValue().asString()).build(), null).block().name();
+                    if(getChannel() instanceof TextChannel) {
+                        ((TextChannel)getChannel()).edit(e -> {
+                            e.setName(mechanism.getValue().asString());
+                        }).block();
+                    } else if(getChannel() instanceof VoiceChannel) {
+                        ((VoiceChannel)getChannel()).edit(e -> {
+                            e.setName(mechanism.getValue().asString());
+                        }).block();
+                    }
                 }
                 // <--[mechanism]
                 // @object DiscordChannelTag
@@ -426,7 +458,15 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
                 // <DiscordChannelTag.position>
                 // -->
                 if (mechanism.matches("position") && mechanism.requireInteger()) {
-                    getChannel().getRestChannel().modify(ChannelModifyRequest.builder().position(mechanism.getValue().asInt()).build(), null).block().position();
+                    if(getChannel() instanceof TextChannel) {
+                        ((TextChannel)getChannel()).edit(e -> {
+                            e.setPosition(mechanism.getValue().asInt());
+                        }).block();
+                    } else if(getChannel() instanceof VoiceChannel) {
+                        ((VoiceChannel)getChannel()).edit(e -> {
+                            e.setPosition(mechanism.getValue().asInt());
+                        }).block();
+                    }
                 }
                 // <--[mechanism]
                 // @object DiscordChannelTag
@@ -438,7 +478,11 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
                 // <DiscordChannelTag.topic>
                 // -->
                 if (mechanism.matches("topic")) {
-                    getChannel().getRestChannel().modify(ChannelModifyRequest.builder().topic(mechanism.getValue().asString()).build(), null).block().topic();
+                    if(getChannel() instanceof TextChannel) {
+                        ((TextChannel)getChannel()).edit(e -> {
+                            e.setTopic(mechanism.getValue().asString());
+                        }).block();
+                    }
                 }
                 // <--[mechanism]
                 // @object DiscordChannelTag
@@ -450,7 +494,11 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
                 // <DiscordChannelTag.nsfw>
                 // -->
                 if (mechanism.matches("nsfw") && mechanism.requireBoolean()) {
-                    getChannel().getRestChannel().modify(ChannelModifyRequest.builder().nsfw(mechanism.getValue().asBoolean()).build(), null).block().nsfw();
+                    if(getChannel() instanceof TextChannel) {
+                        ((TextChannel)getChannel()).edit(e -> {
+                            e.setNsfw(mechanism.getValue().asBoolean());
+                        }).block();
+                    }
                 }
                 // <--[mechanism]
                 // @object DiscordChannelTag
@@ -462,7 +510,11 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
                 // <DiscordChannelTag.rate_limit_per_user>
                 // -->
                 if (mechanism.matches("rate_limit_per_user") && mechanism.requireInteger()) {
-                    getChannel().getRestChannel().modify(ChannelModifyRequest.builder().rateLimitPerUser(mechanism.getValue().asInt()).build(), null).block().rateLimitPerUser();
+                    if(getChannel() instanceof TextChannel) {
+                        ((TextChannel)getChannel()).edit(e -> {
+                            e.setRateLimitPerUser(mechanism.getValue().asInt());
+                        }).block();
+                    }
                 }
                 // <--[mechanism]
                 // @object DiscordChannelTag
@@ -474,7 +526,11 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
                 // <DiscordChannelTag.bitrate>
                 // -->
                 if (mechanism.matches("bitrate") && mechanism.requireInteger()) {
-                    getChannel().getRestChannel().modify(ChannelModifyRequest.builder().bitrate(mechanism.getValue().asInt()).build(), null).block().bitrate();
+                    if(getChannel() instanceof VoiceChannel) {
+                        ((VoiceChannel)getChannel()).edit(e -> {
+                            e.setBitrate(mechanism.getValue().asInt());
+                        }).block();
+                    }
                 }
                 // <--[mechanism]
                 // @object DiscordChannelTag
@@ -486,7 +542,11 @@ public class DiscordChannelTag implements ObjectTag, Adjustable {
                 // <DiscordChannelTag.user_limit>
                 // -->
                 if (mechanism.matches("user_limit") && mechanism.requireInteger()) {
-                    getChannel().getRestChannel().modify(ChannelModifyRequest.builder().userLimit(mechanism.getValue().asInt()).build(), null).block().userLimit();
+                    if(getChannel() instanceof VoiceChannel) {
+                        ((VoiceChannel)getChannel()).edit(e -> {
+                            e.setUserLimit(mechanism.getValue().asInt());
+                        }).block();
+                    }
                 }
             }
         });
