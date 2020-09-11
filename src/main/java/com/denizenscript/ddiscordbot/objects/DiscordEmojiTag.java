@@ -142,6 +142,21 @@ public class DiscordEmojiTag implements ObjectTag {
         });
 
         // <--[tag]
+        // @attribute <DiscordEmojiTag.icon_url>
+        // @returns ElementTag
+        // @plugin dDiscordBot
+        // @description
+        // Returns the URL that the icon is attached too.
+        // Only works for custom emojis.
+        // -->
+        registerTag("icon_url", (attribute, object) -> {
+            if (object.emoji.asCustomEmoji().isPresent()) {
+                return new ElementTag("https://cdn.discordapp.com/emojis/" + object.emoji_id + ".png?v=1");
+            }
+            return null;
+        });
+
+        // <--[tag]
         // @attribute <DiscordEmojiTag.animated>
         // @returns ElementTag
         // @plugin dDiscordBot
