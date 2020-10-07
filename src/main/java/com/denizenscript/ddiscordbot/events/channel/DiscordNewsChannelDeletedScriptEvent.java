@@ -1,35 +1,37 @@
-package com.denizenscript.ddiscordbot.events;
+package com.denizenscript.ddiscordbot.events.channel;
 
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.ddiscordbot.objects.DiscordChannelTag;
 import com.denizenscript.denizencore.objects.ObjectTag;
-import discord4j.core.event.domain.channel.VoiceChannelCreateEvent;
+import discord4j.core.event.domain.channel.NewsChannelDeleteEvent;
 
-public class DiscordVoiceChannelCreatedScriptEvent extends DiscordScriptEvent {
+public class DiscordNewsChannelDeletedScriptEvent extends DiscordScriptEvent {
 
-    public static DiscordVoiceChannelCreatedScriptEvent instance;
+    public static DiscordNewsChannelDeletedScriptEvent instance;
 
     // <--[event]
     // @Events
-    // discord voice channel created
+    // discord news channel deleted
     //
-    // @Regex ^discord voice channel created$
+    // @Regex ^discord news channel deleted$
     //
-    // @Triggers when a voice channel is created
+    // @Group Discord
+    //
+    // @Triggers when a news channel is deleted
     //
     // @Plugin dDiscordBot
     //
     // @Context
-    // <context.channel> returns the channel that was created
+    // <context.channel> returns the channel that was deleted
     // -->
 
-    public VoiceChannelCreateEvent getEvent() {
-        return (VoiceChannelCreateEvent) event;
+    public NewsChannelDeleteEvent getEvent() {
+        return (NewsChannelDeleteEvent) event;
     }
 
     @Override
     public boolean couldMatch(ScriptPath path) {
-        return path.eventLower.startsWith("discord voice channel created");
+        return path.eventLower.startsWith("discord news channel deleted");
     }
 
     @Override
@@ -47,6 +49,6 @@ public class DiscordVoiceChannelCreatedScriptEvent extends DiscordScriptEvent {
 
     @Override
     public String getName() {
-        return "DiscordVoiceChannelCreated";
+        return "DiscordNewsChannelDeleted";
     }
 }

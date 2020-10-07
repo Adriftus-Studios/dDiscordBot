@@ -1,4 +1,4 @@
-package com.denizenscript.ddiscordbot.events;
+package com.denizenscript.ddiscordbot.events.guild;
 
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.ddiscordbot.objects.DiscordChannelTag;
@@ -15,6 +15,10 @@ public class DiscordInviteCreatedScriptEvent extends DiscordScriptEvent {
     // discord invite created
     //
     // @Regex ^discord invite created$
+    //
+    // @Group Discord
+    //
+    // @Cancellable true
     //
     // @Triggers when a category channel category was created.
     //
@@ -52,6 +56,15 @@ public class DiscordInviteCreatedScriptEvent extends DiscordScriptEvent {
             return new DiscordChannelTag(botID, getEvent().getChannelId().asLong());
         }
         return super.getContext(name);
+    }
+
+    @Override
+    public boolean applyDetermination(ScriptPath path, ObjectTag determinationObj) {
+        if (determinationObj.toString().equalsIgnoreCase("cancelled")) {
+            getEvent().getInvite().block().delete().block();
+            return true;
+        }
+        return super.applyDetermination(path, determinationObj);
     }
 
     @Override

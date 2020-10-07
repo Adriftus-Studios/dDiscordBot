@@ -1,4 +1,4 @@
-package com.denizenscript.ddiscordbot.events;
+package com.denizenscript.ddiscordbot.events.voice;
 
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.ddiscordbot.objects.DiscordGroupTag;
@@ -15,6 +15,8 @@ public class DiscordVoiceServerUpdateScriptEvent extends DiscordScriptEvent {
     // discord voice server updates
     //
     // @Regex ^discord voice server updates$
+    //
+    // @Group Discord
     //
     // @Triggers TODO
     //

@@ -1,4 +1,4 @@
-package com.denizenscript.ddiscordbot.events;
+package com.denizenscript.ddiscordbot.events.message;
 
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
@@ -12,7 +12,6 @@ import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.core.ListTag;
 import com.denizenscript.denizencore.objects.ObjectTag;
 import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.common.util.Snowflake;
 
 public class DiscordMessageModifiedScriptEvent extends DiscordScriptEvent {
@@ -27,6 +26,8 @@ public class DiscordMessageModifiedScriptEvent extends DiscordScriptEvent {
     // @Switch for:<bot> to only process the event for a specified Discord bot.
     // @Switch channel:<channel_id> to only process the event when it occurs in a specified Discord channel.
     // @Switch group:<group_id> to only process the event for a specified Discord group.
+    //
+    // @Group Discord
     //
     // @Triggers when a Discord user modified a message.
     //

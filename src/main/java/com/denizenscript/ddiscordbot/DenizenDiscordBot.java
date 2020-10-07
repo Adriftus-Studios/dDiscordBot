@@ -1,13 +1,17 @@
 package com.denizenscript.ddiscordbot;
 
-import com.denizenscript.ddiscordbot.events.*;
+import com.denizenscript.ddiscordbot.events.channel.*;
+import com.denizenscript.ddiscordbot.events.guild.*;
+import com.denizenscript.ddiscordbot.events.message.*;
+import com.denizenscript.ddiscordbot.events.voice.DiscordVoiceServerUpdateScriptEvent;
+import com.denizenscript.ddiscordbot.events.voice.DiscordVoiceStateUpdateScriptEvent;
 import com.denizenscript.ddiscordbot.objects.*;
 import com.denizenscript.ddiscordbot.scripts.DiscordEmbedScriptContainer;
+import com.denizenscript.denizen.objects.notable.NotableManager;
 import com.denizenscript.denizencore.DenizenCore;
 import com.denizenscript.denizencore.events.ScriptEvent;
 import com.denizenscript.denizencore.objects.ObjectFetcher;
 import com.denizenscript.denizencore.objects.core.ElementTag;
-import com.denizenscript.denizencore.objects.core.ListTag;
 import com.denizenscript.denizencore.scripts.ScriptRegistry;
 import com.denizenscript.denizencore.tags.Attribute;
 import com.denizenscript.denizencore.tags.ReplaceableTagEvent;
@@ -39,21 +43,30 @@ public class DenizenDiscordBot extends JavaPlugin implements Listener {
             ScriptEvent.registerScriptEvent(DiscordMessageModifiedScriptEvent.instance = new DiscordMessageModifiedScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordMessageDeletedScriptEvent.instance = new DiscordMessageDeletedScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordMessageReceivedScriptEvent.instance = new DiscordMessageReceivedScriptEvent());
+
             ScriptEvent.registerScriptEvent(DiscordUserJoinsScriptEvent.instance = new DiscordUserJoinsScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordUserLeavesScriptEvent.instance = new DiscordUserLeavesScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordUserRoleChangeScriptEvent.instance = new DiscordUserRoleChangeScriptEvent());
+
             ScriptEvent.registerScriptEvent(DiscordReactionAddedScriptEvent.instance = new DiscordReactionAddedScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordReactionRemovedScriptEvent.instance = new DiscordReactionRemovedScriptEvent());
+
             ScriptEvent.registerScriptEvent(DiscordVoiceStateUpdateScriptEvent.instance = new DiscordVoiceStateUpdateScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordInviteCreatedScriptEvent.instance = new DiscordInviteCreatedScriptEvent());
+
             ScriptEvent.registerScriptEvent(DiscordCategoryCreateScriptEvent.instance = new DiscordCategoryCreateScriptEvent());
+            ScriptEvent.registerScriptEvent(DiscordCategoryUpdatedScriptEvent.instance = new DiscordCategoryUpdatedScriptEvent());
+            ScriptEvent.registerScriptEvent(DiscordCategoryDeletedScriptEvent.instance = new DiscordCategoryDeletedScriptEvent());
+
             ScriptEvent.registerScriptEvent(DiscordVoiceChannelCreatedScriptEvent.instance = new DiscordVoiceChannelCreatedScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordVoiceChannelUpdatedScriptEvent.instance = new DiscordVoiceChannelUpdatedScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordVoiceChannelDeletedScriptEvent.instance = new DiscordVoiceChannelDeletedScriptEvent());
+            ScriptEvent.registerScriptEvent(DiscordVoiceServerUpdateScriptEvent.instance = new DiscordVoiceServerUpdateScriptEvent());
+
             ScriptEvent.registerScriptEvent(DiscordNewsChannelCreatedScriptEvent.instance = new DiscordNewsChannelCreatedScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordNewsChannelDeletedScriptEvent.instance = new DiscordNewsChannelDeletedScriptEvent());
             ScriptEvent.registerScriptEvent(DiscordNewsChannelUpdatedScriptEvent.instance = new DiscordNewsChannelUpdatedScriptEvent());
-            ScriptEvent.registerScriptEvent(DiscordVoiceServerUpdateScriptEvent.instance = new DiscordVoiceServerUpdateScriptEvent());
+
             ObjectFetcher.registerWithObjectFetcher(DiscordChannelTag.class, DiscordChannelTag.tagProcessor);
             ObjectFetcher.registerWithObjectFetcher(DiscordBotTag.class, DiscordBotTag.tagProcessor);
             ObjectFetcher.registerWithObjectFetcher(DiscordGroupTag.class, DiscordGroupTag.tagProcessor);
@@ -62,6 +75,9 @@ public class DenizenDiscordBot extends JavaPlugin implements Listener {
             ObjectFetcher.registerWithObjectFetcher(DiscordMessageTag.class, DiscordMessageTag.tagProcessor);
             ObjectFetcher.registerWithObjectFetcher(DiscordEmojiTag.class, DiscordEmojiTag.tagProcessor);
             ObjectFetcher.registerWithObjectFetcher(DiscordEmbedTag.class, DiscordEmbedTag.tagProcessor);
+
+            NotableManager.registerWithNotableManager(DiscordChannelTag.class);
+            NotableManager.registerWithNotableManager(DiscordMessageTag.class);
             ScriptRegistry._registerType("discord_embed", DiscordEmbedScriptContainer.class);
             Bukkit.getPluginManager().registerEvents(this, this);
             TagManager.registerTagHandler(new TagRunnable.RootForm() {
@@ -70,23 +86,6 @@ public class DenizenDiscordBot extends JavaPlugin implements Listener {
                     discordTagBase(event);
                 }
             }, "discord");
-            // <--[tag]
-            // @attribute <ElementTag.urls>
-            // @returns ListTag
-            // @plugin dDiscordBot
-            // @description
-            // Returns a list of URLs in the element.
-            // Returns empty list if no URLs are found.
-            // -->
-            ElementTag.registerTag("urls", (attribute, object) -> {
-                ListTag list = new ListTag();
-                for (String s : object.asString().split("\\s+")) {
-                    if (s.matches("(https?://)[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")) {
-                        list.addObject(new ElementTag(s));
-                    }
-                }
-                return list;
-            });
         }
         catch (Throwable ex) {
             Debug.echoError(ex);

@@ -1,6 +1,8 @@
 package com.denizenscript.ddiscordbot;
 
-import com.denizenscript.ddiscordbot.events.*;
+import com.denizenscript.ddiscordbot.events.guild.*;
+import com.denizenscript.ddiscordbot.events.message.*;
+import com.denizenscript.ddiscordbot.events.voice.DiscordVoiceStateUpdateScriptEvent;
 import com.denizenscript.denizencore.utilities.debugging.Debug;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;

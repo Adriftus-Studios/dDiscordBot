@@ -1,4 +1,4 @@
-package com.denizenscript.ddiscordbot.events;
+package com.denizenscript.ddiscordbot.events.guild;
 
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
@@ -25,6 +25,8 @@ public class DiscordUserRoleChangeScriptEvent extends DiscordScriptEvent {
     //
     // @Switch for:<bot> to only process the event for a specified Discord bot.
     // @Switch group:<group_id> to only process the event for a specified Discord group.
+    //
+    // @Group Discord
     //
     // @Triggers when a Discord user's roles change.
     //

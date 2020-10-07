@@ -119,7 +119,6 @@ public class DiscordUserTag implements ObjectTag, Adjustable {
     public long user_id;
 
     public static void registerTags() {
-
         TagManager.registerTagHandler(new TagRunnable.RootForm() {
             public void run(ReplaceableTagEvent event) {
                 if (event.matches("discorduser") && !event.replaced()) {

@@ -1,27 +1,29 @@
-package com.denizenscript.ddiscordbot.events;
+package com.denizenscript.ddiscordbot.events.guild;
 
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
 import com.denizenscript.ddiscordbot.objects.DiscordGroupTag;
 import com.denizenscript.ddiscordbot.objects.DiscordUserTag;
-import discord4j.core.event.domain.guild.MemberLeaveEvent;
+import discord4j.core.event.domain.guild.MemberJoinEvent;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.ObjectTag;
 
-public class DiscordUserLeavesScriptEvent extends DiscordScriptEvent {
+public class DiscordUserJoinsScriptEvent extends DiscordScriptEvent {
 
-    public static DiscordUserLeavesScriptEvent instance;
+    public static DiscordUserJoinsScriptEvent instance;
 
     // <--[event]
     // @Events
-    // discord user leaves
+    // discord user joins
     //
-    // @Regex ^on discord user leaves$
+    // @Regex ^on discord user join$
     //
     // @Switch for:<bot> to only process the event for a specified Discord bot.
     // @Switch group:<group_id> to only process the event for a specified Discord group.
     //
-    // @Triggers when a Discord user leaves a guild.
+    // @Group Discord
+    //
+    // @Triggers when a Discord user joins a guild.
     //
     // @Plugin dDiscordBot
     //
@@ -31,8 +33,8 @@ public class DiscordUserLeavesScriptEvent extends DiscordScriptEvent {
     // <context.user> returns the user.
     // -->
 
-    public MemberLeaveEvent getEvent() {
-        return (MemberLeaveEvent) event;
+    public MemberJoinEvent getEvent() {
+        return (MemberJoinEvent) event;
     }
 
     @Override
@@ -45,7 +47,7 @@ public class DiscordUserLeavesScriptEvent extends DiscordScriptEvent {
 
     @Override
     public boolean couldMatch(ScriptPath path) {
-        return path.eventLower.startsWith("discord user leaves");
+        return path.eventLower.startsWith("discord user joins");
     }
 
     @Override
@@ -54,7 +56,7 @@ public class DiscordUserLeavesScriptEvent extends DiscordScriptEvent {
             return new DiscordGroupTag(botID, getEvent().getGuildId().asLong());
         }
         else if (name.equals("user")) {
-            return new DiscordUserTag(botID, getEvent().getMember().get());
+            return new DiscordUserTag(botID, getEvent().getMember());
         }
         else if (name.equals("group_name")) {
             DenizenDiscordBot.userContextDeprecation.warn();
@@ -62,17 +64,17 @@ public class DiscordUserLeavesScriptEvent extends DiscordScriptEvent {
         }
         else if (name.equals("user_id")) {
             DenizenDiscordBot.userContextDeprecation.warn();
-            return new ElementTag(getEvent().getMember().get().getId().asLong());
+            return new ElementTag(getEvent().getMember().getId().asLong());
         }
         else if (name.equals("user_name")) {
             DenizenDiscordBot.userContextDeprecation.warn();
-            return new ElementTag(getEvent().getMember().get().getUsername());
+            return new ElementTag(getEvent().getMember().getUsername());
         }
         return super.getContext(name);
     }
 
     @Override
     public String getName() {
-        return "DiscordUserLeaves";
+        return "DiscordUserJoins";
     }
 }

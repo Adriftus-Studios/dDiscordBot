@@ -1,4 +1,4 @@
-package com.denizenscript.ddiscordbot.events;
+package com.denizenscript.ddiscordbot.events.voice;
 
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.ddiscordbot.objects.DiscordChannelTag;
@@ -15,6 +15,8 @@ public class DiscordVoiceStateUpdateScriptEvent   extends DiscordScriptEvent {
     // discord voice state updates
     //
     // @Regex ^discord voice state updates$
+    //
+    // @Group Discord
     //
     // @Triggers when a User joins or leaves a voice channel.
     //

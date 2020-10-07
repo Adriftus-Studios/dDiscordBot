@@ -1,21 +1,23 @@
-package com.denizenscript.ddiscordbot.events;
+package com.denizenscript.ddiscordbot.events.guild;
 
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.denizencore.objects.ObjectTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
-import discord4j.core.event.domain.channel.CategoryCreateEvent;
+import discord4j.core.event.domain.channel.CategoryDeleteEvent;
 
-public class DiscordCategoryCreateScriptEvent   extends DiscordScriptEvent {
+public class DiscordCategoryUpdatedScriptEvent extends DiscordScriptEvent {
 
-    public static DiscordCategoryCreateScriptEvent instance;
+    public static DiscordCategoryUpdatedScriptEvent instance;
 
     // <--[event]
     // @Events
-    // discord category created
+    // discord category updated
     //
-    // @Regex ^discord category created$
+    // @Regex ^discord category updated$
     //
-    // @Triggers when a category channel category was created.
+    // @Group Discord
+    //
+    // @Triggers when a channel category is updated.
     //
     // @Plugin dDiscordBot
     //
@@ -23,13 +25,13 @@ public class DiscordCategoryCreateScriptEvent   extends DiscordScriptEvent {
     // <context.name> returns the name of the category
     // -->
 
-    public CategoryCreateEvent getEvent() {
-        return (CategoryCreateEvent) event;
+    public CategoryDeleteEvent getEvent() {
+        return (CategoryDeleteEvent) event;
     }
 
     @Override
     public boolean couldMatch(ScriptPath path) {
-        return path.eventLower.startsWith("discord category created");
+        return path.eventLower.startsWith("discord category updated");
     }
 
     @Override
@@ -47,6 +49,6 @@ public class DiscordCategoryCreateScriptEvent   extends DiscordScriptEvent {
 
     @Override
     public String getName() {
-        return "DiscordCategoryCreated";
+        return "DiscordCategoryUpdated";
     }
 }

@@ -2,10 +2,13 @@ package com.denizenscript.ddiscordbot.objects;
 
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
 import com.denizenscript.ddiscordbot.DiscordConnection;
+import com.denizenscript.denizen.objects.notable.NotableManager;
 import com.denizenscript.denizencore.objects.*;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.core.ListTag;
 import com.denizenscript.denizencore.objects.core.MapTag;
+import com.denizenscript.denizencore.objects.notable.Notable;
+import com.denizenscript.denizencore.objects.notable.Note;
 import com.denizenscript.denizencore.tags.*;
 import com.denizenscript.denizencore.utilities.CoreUtilities;
 import discord4j.common.util.Snowflake;
@@ -25,12 +28,16 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DiscordMessageTag implements ObjectTag, Adjustable {
+public class DiscordMessageTag implements ObjectTag, Adjustable, Notable {
 
     @Fetchable("discordmessage")
     public static DiscordMessageTag valueOf(String string, TagContext context) {
         if (string.startsWith("discordmessage@")) {
             string = string.substring("discordmessage@".length());
+        }
+        Notable noted = NotableManager.getSavedObject(string);
+        if (noted instanceof DiscordMessageTag) {
+            return (DiscordMessageTag) noted;
         }
         if (string.contains("@")) {
             return null;
@@ -376,7 +383,32 @@ public class DiscordMessageTag implements ObjectTag, Adjustable {
 
     @Override
     public boolean isUnique() {
+        for (DiscordMessageTag saved : NotableManager.getAllType(DiscordMessageTag.class)) {
+            if (saved.channel.getId().asLong() != this.channel.getId().asLong()) {
+                continue;
+            }
+            if (saved.message.getId().asLong() != this.message.getId().asLong()) {
+                continue;
+            }
+            return true;
+        }
         return false;
+    }
+
+    public void makeUnique(String id) {
+        NotableManager.saveAs(this, id);
+    }
+
+    @Note("DiscordMessage")
+    public String getSaveObject() {
+        if (bot != null) {
+            return bot + "," + channel.getId().asString() + "," + message.getId().asString();
+        }
+        return channel.getId().asString() + "," + message.getId().asString();
+    }
+
+    public void forget() {
+        NotableManager.remove(this);
     }
 
     @Override

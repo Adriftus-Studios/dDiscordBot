@@ -1,4 +1,4 @@
-package com.denizenscript.ddiscordbot.events;
+package com.denizenscript.ddiscordbot.events.message;
 
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import java.util.List;
@@ -18,7 +18,6 @@ import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.core.ListTag;
 import com.denizenscript.denizencore.objects.ObjectTag;
 import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.common.util.Snowflake;
 
 public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
@@ -34,6 +33,10 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
     // @Switch for:<bot> to only process the event for a specified Discord bot.
     // @Switch channel:<channel_id> to only process the event when it occurs in a specified Discord channel.
     // @Switch group:<group_id> to only process the event for a specified Discord group.
+    //
+    // @Group Discord
+    //
+    // @Cancellable true
     //
     // @Triggers when a Discord bot receives a message.
     //
@@ -155,6 +158,20 @@ public class DiscordMessageReceivedScriptEvent extends DiscordScriptEvent {
             return list;
         }
         return super.getContext(name);
+    }
+
+    @Override
+    public boolean applyDetermination(ScriptPath path, ObjectTag determinationObj) {
+        if (determinationObj.toString().equalsIgnoreCase("cancelled")) {
+            getEvent().getMessage().delete().block();
+            return true;
+        }
+//        else if (determinationObj.toString().toLowerCase().startsWith("message:")) {
+//            getEvent().getMessage().edit(c -> {
+//                c.setContent(determinationObj.toString().substring(8));
+//            }).block();
+//        } TODO: fix error "Cannot edit a message authored by another user"
+        return super.applyDetermination(path, determinationObj);
     }
 
     @Override

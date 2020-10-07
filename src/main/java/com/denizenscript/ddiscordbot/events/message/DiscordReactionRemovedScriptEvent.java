@@ -1,28 +1,30 @@
-package com.denizenscript.ddiscordbot.events;
+package com.denizenscript.ddiscordbot.events.message;
 
 import com.denizenscript.ddiscordbot.DenizenDiscordBot;
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.ddiscordbot.objects.*;
 import com.denizenscript.denizencore.objects.ObjectTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
-import discord4j.core.event.domain.message.ReactionAddEvent;
+import discord4j.core.event.domain.message.ReactionRemoveEvent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 
-public class DiscordReactionAddedScriptEvent extends DiscordScriptEvent {
-    public static DiscordReactionAddedScriptEvent instance;
+public class DiscordReactionRemovedScriptEvent  extends DiscordScriptEvent {
+    public static DiscordReactionRemovedScriptEvent instance;
 
     // <--[event]
     // @Events
-    // discord reaction added
+    // discord reaction removed
     //
-    // @Regex ^on discord reaction added$
+    // @Regex ^on discord reaction removed$
     //
     // @Switch for:<bot> to only process the event for a specified Discord bot.
     // @Switch channel:<channel_id> to only process the event when it occurs in a specified Discord channel.
     // @Switch group:<group_id> to only process the event for a specified Discord group.
     //
-    // @Triggers when a Discord user adds a reaction to a message.
+    // @Group Discord
+    //
+    // @Triggers when a Discord user removes a reaction from a message.
     //
     // @Plugin dDiscordBot
     //
@@ -39,13 +41,13 @@ public class DiscordReactionAddedScriptEvent extends DiscordScriptEvent {
     //
     // -->
 
-    public ReactionAddEvent getEvent() {
-        return (ReactionAddEvent) event;
+    public ReactionRemoveEvent getEvent() {
+        return (ReactionRemoveEvent) event;
     }
 
     @Override
     public boolean couldMatch(ScriptPath path) {
-        return path.eventLower.startsWith("discord reaction added");
+        return path.eventLower.startsWith("discord reaction removed");
     }
 
     @Override
@@ -81,11 +83,11 @@ public class DiscordReactionAddedScriptEvent extends DiscordScriptEvent {
         else if (name.equals("emoji")) {
             return new DiscordEmojiTag(botID, getEvent().getEmoji());
         }
-        else if (name.equals("message")) {
-            return new DiscordMessageTag(botID, getEvent().getMessage().block());
-        }
         else if (name.equals("message_id")) {
             return new ElementTag(getEvent().getMessage().block().getId().asString());
+        }
+        else if (name.equals("message")) {
+            return new DiscordMessageTag(botID, getEvent().getMessage().block());
         }
         else if (name.equals("channel_name")) {
             DenizenDiscordBot.userContextDeprecation.warn();
@@ -105,6 +107,6 @@ public class DiscordReactionAddedScriptEvent extends DiscordScriptEvent {
 
     @Override
     public String getName() {
-        return "DiscordReactionAdded";
+        return "DiscordReactionRemoved";
     }
 }

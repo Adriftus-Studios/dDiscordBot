@@ -1,4 +1,4 @@
-package com.denizenscript.ddiscordbot.events;
+package com.denizenscript.ddiscordbot.events.channel;
 
 import com.denizenscript.ddiscordbot.DiscordScriptEvent;
 import com.denizenscript.ddiscordbot.objects.DiscordChannelTag;
@@ -14,6 +14,8 @@ public class DiscordNewsChannelUpdatedScriptEvent extends DiscordScriptEvent {
     // discord news channel updated
     //
     // @Regex ^discord news channel updated$
+    //
+    // @Group Discord
     //
     // @Triggers when a news channel is updated
     //
