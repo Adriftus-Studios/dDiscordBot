@@ -166,7 +166,7 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
             else if (!scriptEntry.hasObject("channel")
                     && arg.matchesPrefix("channel")
                     && arg.matchesArgumentType(DiscordChannelTag.class)) {
-                scriptEntry.addObject("channel", arg.asType(DiscordChannelTag.class));
+                scriptEntry.addObject("channel", arg.object);
             }
             else if (!scriptEntry.hasObject("url")
                     && arg.matchesPrefix("url")) {
@@ -258,7 +258,7 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
         ElementTag id = scriptEntry.getElement("id");
         ElementTag instruction = scriptEntry.getElement("instruction");
         ElementTag code = scriptEntry.getElement("code"); // Intentionally do not debug this value.
-        DiscordChannelTag channel = scriptEntry.getObjectTag("channel");
+        DiscordChannelTag channel = scriptEntry.hasObject("channel") ? (scriptEntry.getObjectTag("channel") instanceof DiscordChannelTag ? scriptEntry.getObjectTag("channel") : new DiscordChannelTag(id.asString(), scriptEntry.getElement("channel").asLong())) : null;
         ElementTag message = scriptEntry.getElement("message");
         ElementTag status = scriptEntry.getElement("status");
         ElementTag activity = scriptEntry.getElement("activity");
