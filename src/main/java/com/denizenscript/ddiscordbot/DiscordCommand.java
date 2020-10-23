@@ -1,7 +1,16 @@
 package com.denizenscript.ddiscordbot;
 
 import com.denizenscript.ddiscordbot.objects.*;
+import com.denizenscript.denizencore.exceptions.InvalidArgumentsException;
 import com.denizenscript.denizencore.objects.Argument;
+import com.denizenscript.denizencore.objects.core.ElementTag;
+import com.denizenscript.denizencore.scripts.ScriptEntry;
+import com.denizenscript.denizencore.scripts.commands.AbstractCommand;
+import com.denizenscript.denizencore.scripts.commands.Holdable;
+import com.denizenscript.denizencore.scripts.queues.ScriptQueue;
+import com.denizenscript.denizencore.utilities.CoreUtilities;
+import com.denizenscript.denizencore.utilities.debugging.Debug;
+import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
@@ -11,27 +20,17 @@ import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
-import com.denizenscript.denizencore.utilities.debugging.Debug;
-import com.denizenscript.denizencore.exceptions.InvalidArgumentsException;
-import com.denizenscript.denizencore.objects.core.ElementTag;
-import com.denizenscript.denizencore.scripts.ScriptEntry;
-import com.denizenscript.denizencore.scripts.commands.AbstractCommand;
-import com.denizenscript.denizencore.scripts.commands.Holdable;
-import com.denizenscript.denizencore.scripts.queues.ScriptQueue;
-import com.denizenscript.denizencore.utilities.CoreUtilities;
 import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.EmbedFieldData;
-import discord4j.discordjson.json.ImmutableEmbedData;
 import discord4j.discordjson.json.gateway.StatusUpdate;
-import discord4j.common.util.Snowflake;
 import discord4j.store.jdk.JdkStoreService;
 import org.bukkit.Bukkit;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Field;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class DiscordCommand extends AbstractCommand implements Holdable {
 
@@ -138,9 +137,17 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
     // Use to send embedded messages to a user.
     // - ~discord id:mybot send_embed user:<[user]> embed:<discordembed.title[test].description[something]>
     //
+    // @Usage
+    // Use to edit an existing embedded message.
+    // - ~discord id:mybot edit_embed channel:<[channel]> message_id:<[msg]> embed:<discordembed.title[test_title].description[description].fields[<map[a/1|b/2|c/3]>]>
+    //
+    // @Usage
+    // Use to edit an existing embedded message that was sent in a private DM channel.
+    // - ~discord id:mybot edit_embed user:<[user]> message_id:<[msg]> embed:<discordembed.title[test_title].description[description].fields[<map[a/1|b/2|c/3]>]>
+    //
     // -->
 
-    public enum DiscordInstruction { CONNECT, DISCONNECT, MESSAGE, ADD_ROLE, REMOVE_ROLE, STATUS, RENAME, START_TYPING, STOP_TYPING, EDIT_MESSAGE, DELETE_MESSAGE, SEND_EMBED }
+    public enum DiscordInstruction { CONNECT, DISCONNECT, MESSAGE, ADD_ROLE, REMOVE_ROLE, STATUS, RENAME, START_TYPING, STOP_TYPING, EDIT_MESSAGE, DELETE_MESSAGE, SEND_EMBED, EDIT_EMBED }
 
     @Override
     public void parseArgs(ScriptEntry scriptEntry) throws InvalidArgumentsException {
@@ -244,15 +251,6 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
         }
     }
 
-    public static void errorMessage(ScriptQueue queue, String message) {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(DenizenDiscordBot.instance, new Runnable() {
-            @Override
-            public void run() {
-                Debug.echoError(queue, message);
-            }
-        }, 0);
-    }
-
     @Override
     public void execute(ScriptEntry scriptEntry) {
         ElementTag id = scriptEntry.getElement("id");
@@ -338,6 +336,64 @@ public class DiscordCommand extends AbstractCommand implements Holdable {
                         return;
                     }
                     DenizenDiscordBot.instance.connections.remove(id.asString()).client.logout().block();
+                    scriptEntry.setFinished(true);
+                    break;
+                }
+                case EDIT_EMBED: {
+                    DiscordEmbedTag embed = scriptEntry.getObjectTag("embed");
+                    if (channel == null && user == null) {
+                        if (!requireChannel.get()) {
+                            requireUser.get();
+                        }
+                        scriptEntry.setFinished(true);
+                        return;
+                    }
+                    if (requireClientID.get() || requireMessageId.get()) {
+                        return;
+                    }
+                    GatewayDiscordClient client = DenizenDiscordBot.instance.connections.get(id.asString()).client;
+                    if (requireClientObject.apply(client)) {
+                        return;
+                    }
+                    if (embed != null) {
+                        if (channel == null) {
+                            Message m = client.getMessageById(user.getUser().getPrivateChannel().block().getId(), Snowflake.of(messageId.asLong())).block();
+                            m.edit(c -> {
+                                c.setEmbed(e -> {
+                                    try {
+                                        Field f1 = e.getClass().getDeclaredField("requestBuilder");
+                                        f1.setAccessible(true);
+                                        f1.set(e, embed.build());
+                                        Field f2 = e.getClass().getDeclaredField("fields");
+                                        f2.setAccessible(true);
+                                        f2.set(e, embed.fields);
+                                    } catch (NoSuchFieldException | IllegalAccessException err) {
+                                        err.printStackTrace();
+                                    }
+                                });
+                            }).block();
+
+                            scriptEntry.setFinished(true);
+                        } else {
+                            Message m = client.getMessageById(Snowflake.of(channel.channel_id), Snowflake.of(messageId.asLong())).block();
+                            m.edit(c -> {
+                                c.setEmbed(e -> {
+                                    try {
+                                        Field f1 = e.getClass().getDeclaredField("requestBuilder");
+                                        f1.setAccessible(true);
+                                        f1.set(e, embed.build());
+                                        Field f2 = e.getClass().getDeclaredField("fields");
+                                        f2.setAccessible(true);
+                                        f2.set(e, embed.fields);
+                                    } catch (NoSuchFieldException | IllegalAccessException err) {
+                                        err.printStackTrace();
+                                    }
+                                });
+                            }).block();
+
+                            scriptEntry.setFinished(true);
+                        }
+                    }
                     scriptEntry.setFinished(true);
                     break;
                 }
