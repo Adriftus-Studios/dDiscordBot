@@ -232,7 +232,7 @@ public class DiscordChannelTag implements ObjectTag, Adjustable, Notable {
         // Returns the position of the channel.
         // -->
         registerTag("position", (attribute, object) -> {
-            return new ElementTag(((GuildChannel) object.channel).getPosition().toString());
+            return new ElementTag(((GuildChannel) object.channel).getPosition().block());
         });
 
         // <--[tag]
