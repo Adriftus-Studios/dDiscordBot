@@ -25,6 +25,94 @@ public class DiscordEmbedTag implements ObjectTag {
     @Fetchable("discordembed")
     public static DiscordEmbedTag valueOf(String string, TagContext context) {
         DiscordEmbedTag tag = new DiscordEmbedTag();
+        string = string.replace("discordembed@", "");
+        for(String arg : string.split(";")) {
+            String key = arg.split("=")[0];
+            String value = arg.split("=")[1];
+            switch(key) {
+                case "author_name":
+                    tag.authorBuilder = (tag.authorBuilder != null ? tag.authorBuilder.name(value) : EmbedAuthorData.builder().name(value));
+                    break;
+                case "author_url":
+                    tag.authorBuilder = (tag.authorBuilder != null ? tag.authorBuilder.url(value) : EmbedAuthorData.builder().url(value));
+                    break;
+                case "author_icon_url":
+                    tag.authorBuilder = (tag.authorBuilder != null ? tag.authorBuilder.iconUrl(value) : EmbedAuthorData.builder().iconUrl(value));
+                    break;
+                case "footer_text":
+                    tag.footerBuilder = (tag.footerBuilder != null ? tag.footerBuilder.text(value) : EmbedFooterData.builder().text(value));
+                    break;
+                case "footer_icon_url":
+                    tag.footerBuilder = (tag.footerBuilder != null ? tag.footerBuilder.iconUrl(value) : EmbedFooterData.builder().iconUrl(value));
+                    break;
+                case "image_width":
+                    tag.imageBuilder = (tag.imageBuilder != null ? tag.imageBuilder.width(Integer.valueOf(value)) : EmbedImageData.builder().width(Integer.valueOf(value)));
+                    break;
+                case "image_height":
+                    tag.imageBuilder = (tag.imageBuilder != null ? tag.imageBuilder.height(Integer.valueOf(value)) : EmbedImageData.builder().height(Integer.valueOf(value)));
+                    break;
+                case "image_url":
+                    tag.imageBuilder = (tag.imageBuilder != null ? tag.imageBuilder.url(value) : EmbedImageData.builder().url(value));
+                    break;
+                case "video_width":
+                    tag.videoBuilder = (tag.videoBuilder != null ? tag.videoBuilder.width(Integer.valueOf(value)) : EmbedVideoData.builder().width(Integer.valueOf(value)));
+                    break;
+                case "video_height":
+                    tag.videoBuilder = (tag.videoBuilder != null ? tag.videoBuilder.height(Integer.valueOf(value)) : EmbedVideoData.builder().height(Integer.valueOf(value)));
+                    break;
+                case "video_url":
+                    tag.videoBuilder = (tag.videoBuilder != null ? tag.videoBuilder.url(value) : EmbedVideoData.builder().url(value));
+                    break;
+                case "thumbnail_width":
+                    tag.thumbnailBuilder = (tag.thumbnailBuilder != null ? tag.thumbnailBuilder.width(Integer.valueOf(value)) : EmbedThumbnailData.builder().width(Integer.valueOf(value)));
+                    break;
+                case "thumbnail_height":
+                    tag.thumbnailBuilder = (tag.thumbnailBuilder != null ? tag.thumbnailBuilder.height(Integer.valueOf(value)) : EmbedThumbnailData.builder().height(Integer.valueOf(value)));
+                    break;
+                case "thumbnail_url":
+                    tag.thumbnailBuilder = (tag.thumbnailBuilder != null ? tag.thumbnailBuilder.url(value) : EmbedThumbnailData.builder().url(value));
+                    break;
+                case "provider_name":
+                    tag.providerBuilder = (tag.providerBuilder != null ? tag.providerBuilder.name(value) : EmbedProviderData.builder().name(value));
+                    break;
+                case "provider_url":
+                    tag.providerBuilder = (tag.providerBuilder != null ? tag.providerBuilder.url(value) : EmbedProviderData.builder().url(value));
+                    break;
+                case "title":
+                    tag.builder = tag.builder.title(value);
+                    break;
+                case "description":
+                    tag.builder = tag.builder.description(value);
+                    break;
+                case "embed_type":
+                    tag.builder = tag.builder.type(value);
+                    break;
+                case "color":
+                    tag.builder = tag.builder.color(Integer.valueOf(value));
+                    break;
+                case "url":
+                    tag.builder = tag.builder.url(value);
+                    break;
+                case "fields":
+                    if(true) {
+                        MapTag map = MapTag.valueOf(unEscape(value), null);
+                        List<EmbedFieldData> fields = new ArrayList<>();
+                        for(Map.Entry<StringHolder, ObjectTag> e : map.map.entrySet()) {
+                            tag.fields.add(EmbedFieldData.builder().name(e.getKey().str).value(((ElementTag)e.getValue()).asString()).inline(false).build());
+                        }
+                    }
+                    break;
+                case "inline_fields":
+                    if(true) {
+                        MapTag map = MapTag.valueOf(unEscape(value), null);
+                        List<EmbedFieldData> fields = new ArrayList<>();
+                        for(Map.Entry<StringHolder, ObjectTag> e : map.map.entrySet()) {
+                            tag.fields.add(EmbedFieldData.builder().name(e.getKey().str).value(((ElementTag)e.getValue()).asString()).inline(true).build());
+                        }
+                    }
+                    break;
+            }
+        }
         //TODO
         return tag;
     }
@@ -74,6 +162,7 @@ public class DiscordEmbedTag implements ObjectTag {
         if(providerBuilder != null) {
             b = b.provider(providerBuilder.build());
         }
+        b = b.addAllFields(fields);
         return b;
     }
 
@@ -400,33 +489,44 @@ public class DiscordEmbedTag implements ObjectTag {
     public String identify() {
         String id = "discordembed@";
         List<String> fields = new ArrayList<String>();
-        if (builder.build().isAuthorPresent() && !builder.build().author().get().name().isAbsent()) { fields.add("author_name=" + escape(builder.build().author().get().name().get())); }
-        if (builder.build().isAuthorPresent() && !builder.build().author().get().url().isAbsent()) { fields.add("author_url=" + escape(builder.build().author().get().url().get())); }
-        if (builder.build().isAuthorPresent() && !builder.build().author().get().iconUrl().isAbsent()) { fields.add("author_icon_url=" + escape(builder.build().author().get().iconUrl().get())); }
-        if (builder.build().isFooterPresent()) { fields.add("footer_text=" + escape(builder.build().footer().get().text())); }
-        if (builder.build().isFooterPresent() && !builder.build().footer().get().iconUrl().isAbsent()) { fields.add("footer_icon_url=" + escape(builder.build().footer().get().iconUrl().get())); }
-        if (builder.build().isImagePresent()) { fields.add("image_width=" + builder.build().image().get().width()); }
-        if (builder.build().isImagePresent()) { fields.add("image_height=" + builder.build().image().get().height()); }
-        if (builder.build().isImagePresent() && !builder.build().image().get().url().isAbsent()) { fields.add("image_url=" + escape(builder.build().image().get().url().get())); }
-        if (builder.build().isVideoPresent()) { fields.add("video_width=" + builder.build().video().get().width()); }
-        if (builder.build().isVideoPresent()) { fields.add("video_height=" + builder.build().video().get().height()); }
-        if (builder.build().isVideoPresent() && !builder.build().video().get().url().isAbsent()) { fields.add("video_url=" + escape(builder.build().video().get().url().get())); }
-        if (builder.build().isThumbnailPresent()) { fields.add("thumbnail_width=" + builder.build().thumbnail().get().width()); }
-        if (builder.build().isThumbnailPresent()) { fields.add("thumbnail_height=" + builder.build().thumbnail().get().height()); }
-        if (builder.build().isThumbnailPresent()) { fields.add("thumbnail_url=" + escape(builder.build().thumbnail().get().url().get())); }
-        if (builder.build().isProviderPresent() && !builder.build().provider().get().name().isAbsent()) { fields.add("provider_name=" + escape(builder.build().provider().get().name().get())); }
-        if (builder.build().isProviderPresent() && !builder.build().provider().get().url().isAbsent()) { fields.add("provider_url=" + escape(builder.build().provider().get().url().get().get())); }
-        if (builder.build().isTitlePresent()) { fields.add("title=" + escape(builder.build().title().get())); }
-        if (builder.build().isDescriptionPresent()) { fields.add("description=" + escape(builder.build().description().get())); }
-        if (builder.build().isTypePresent()) { fields.add("embed_type=" + escape(builder.build().type().get())); }
-        if (builder.build().isColorPresent()) { fields.add("color=" + builder.build().color().get()); }
-        if (builder.build().isUrlPresent()) { fields.add("url=" + escape(builder.build().url().get())); }
-        if (builder.build().isFieldsPresent()) {
+        ImmutableEmbedData build = build().build();
+        if (build.isAuthorPresent() && !build.author().get().name().isAbsent()) { fields.add("author_name=" + escape(build.author().get().name().get())); }
+        if (build.isAuthorPresent() && !build.author().get().url().isAbsent()) { fields.add("author_url=" + escape(build.author().get().url().get())); }
+        if (build.isAuthorPresent() && !build.author().get().iconUrl().isAbsent()) { fields.add("author_icon_url=" + escape(build.author().get().iconUrl().get())); }
+        if (build.isFooterPresent()) { fields.add("footer_text=" + escape(build.footer().get().text())); }
+        if (build.isFooterPresent() && !build.footer().get().iconUrl().isAbsent()) { fields.add("footer_icon_url=" + escape(build.footer().get().iconUrl().get())); }
+        if (build.isImagePresent()) { fields.add("image_width=" + build.image().get().width()); }
+        if (build.isImagePresent()) { fields.add("image_height=" + build.image().get().height()); }
+        if (build.isImagePresent() && !build.image().get().url().isAbsent()) { fields.add("image_url=" + escape(build.image().get().url().get())); }
+        if (build.isVideoPresent()) { fields.add("video_width=" + build.video().get().width()); }
+        if (build.isVideoPresent()) { fields.add("video_height=" + build.video().get().height()); }
+        if (build.isVideoPresent() && !build.video().get().url().isAbsent()) { fields.add("video_url=" + escape(build.video().get().url().get())); }
+        if (build.isThumbnailPresent()) { fields.add("thumbnail_width=" + build.thumbnail().get().width()); }
+        if (build.isThumbnailPresent()) { fields.add("thumbnail_height=" + build.thumbnail().get().height()); }
+        if (build.isThumbnailPresent()) { fields.add("thumbnail_url=" + escape(build.thumbnail().get().url().get())); }
+        if (build.isProviderPresent() && !build.provider().get().name().isAbsent()) { fields.add("provider_name=" + escape(build.provider().get().name().get())); }
+        if (build.isProviderPresent() && !build.provider().get().url().isAbsent()) { fields.add("provider_url=" + escape(build.provider().get().url().get().get())); }
+        if (build.isTitlePresent()) { fields.add("title=" + escape(build.title().get())); }
+        if (build.isDescriptionPresent()) { fields.add("description=" + escape(build.description().get())); }
+        if (build.isTypePresent()) { fields.add("embed_type=" + escape(build.type().get())); }
+        if (build.isColorPresent()) { fields.add("color=" + build.color().get()); }
+        if (build.isUrlPresent()) { fields.add("url=" + escape(build.url().get())); }
+        if (build.isFieldsPresent()) {
             MapTag map = new MapTag();
-            for(EmbedFieldData s : builder.build().fields().get()) {
-                map.putObject(s.name(), new ElementTag(s.value()));
+            MapTag inline = new MapTag();
+            for(EmbedFieldData s : build.fields().get()) {
+                if(s.inline().get()) {
+                    inline.putObject(s.name(), new ElementTag(s.value()));
+                } else {
+                    map.putObject(s.name(), new ElementTag(s.value()));
+                }
             }
-            fields.add("fields=" + escape(map.identify()));
+            if(map.map.size() != 0) {
+                fields.add("fields=" + escape(map.identify()));
+            }
+            if(inline.map.size() != 0) {
+                fields.add("inline_fields=" + escape(inline.identify()));
+            }
         }
         id = id + String.join(";", fields);
         return id;
